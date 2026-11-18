@@ -83,6 +83,8 @@ exit $LASTEXITCODE
 
 ## 2026-11-18 · Phase 1 · Domain, persistence and request API
 
+Measurements and commands below refer to implementation commit `89bd0712b5a058c95d8598bbab19180042f81a15`.
+
 Implemented draft creation, partial edits, filtered lists with global counts, detail, submit and audit history. SQLite persists business data, evidence declarations and versioned risk assessments. Alembic applies the pinned schema at startup. Reviewed the generated migration and added update/delete guards on audit rows. The complete submit path ends at UNDER_REVIEW in this milestone.
 
 ### Decisions
