@@ -1,37 +1,52 @@
-<header>
-  <div class="frame masthead">
-    <div class="brand"><span class="mark" aria-hidden="true">V</span>VendorFlow <b>AI</b></div>
+<a class="skip" href="#content" (click)="focusContent($event)">Skip to content</a>
+<div class="shell">
+  <aside class="rail" aria-label="Workspace navigation and environment">
+    <a class="brand" routerLink="/" aria-label="VendorFlow AI home"
+      ><span class="mark" aria-hidden="true"></span><span>VendorFlow <b>AI</b></span></a
+    >
     <nav aria-label="Workspace">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
-        >Dashboard</a
-      ><a routerLink="/queue" routerLinkActive="active">Review queue</a
-      ><a routerLink="/metrics" routerLinkActive="active">Metrics</a>
+      <a
+        routerLink="/"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        [routerLinkActiveOptions]="{ exact: true }"
+        ><i class="navicon dashboard-icon" aria-hidden="true"></i>Dashboard</a
+      >
+      <a routerLink="/queue" routerLinkActive="active" ariaCurrentWhenActive="page"
+        ><i class="navicon queue-icon" aria-hidden="true"></i>Review queue</a
+      >
+      <a routerLink="/metrics" routerLinkActive="active" ariaCurrentWhenActive="page"
+        ><i class="navicon metrics-icon" aria-hidden="true"></i>Metrics</a
+      >
     </nav>
-    <label class="persona"
+    <section class="integrations" aria-label="Environment and integrations" aria-live="polite">
+      <strong>Demo mode: no authentication</strong>
+      @if (modes(); as config) {
+        <span
+          >AI
+          <b [class.available]="config.llm_mode === 'configured'">{{
+            config.llm_mode === 'configured' ? 'Configured' : 'Unavailable'
+          }}</b></span
+        >
+        <span
+          >Jira <b>{{ config.jira_mode === 'live' ? 'Live' : 'Simulation' }}</b></span
+        >
+      } @else if (failed()) {
+        <span>Integration status unavailable.</span><button (click)="loadModes()">Retry</button>
+      } @else {
+        <span>Loading integration status…</span>
+      }
+    </section>
+  </aside>
+  <header class="topbar">
+    <span>Procurement workspace</span
+    ><label class="persona"
       >Persona
       <select #role [value]="workspace.persona()" (change)="workspace.switchPersona(role.value)">
         <option>Requester</option>
         <option>Reviewer</option>
       </select></label
     >
-  </div>
-</header>
-<div class="frame">
-  <section class="modes" aria-label="Environment and integrations" aria-live="polite">
-    <strong>Demo mode: no authentication</strong>
-    @if (modes(); as config) {
-      <span
-        >AI <b>{{ config.llm_mode === 'configured' ? 'Configured' : 'Unavailable' }}</b></span
-      >
-      <span
-        >Jira <b>{{ config.jira_mode === 'live' ? 'Live' : 'Simulation' }}</b></span
-      >
-    } @else if (failed()) {
-      <span>Integration status unavailable. Check the local API.</span>
-      <button mat-button (click)="loadModes()">Retry</button>
-    } @else {
-      <span>Loading integration status…</span>
-    }
-  </section>
-  <main><router-outlet /></main>
+  </header>
+  <main id="content" tabindex="-1"><router-outlet /></main>
 </div>

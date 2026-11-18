@@ -29,7 +29,7 @@
   </ol>
   <form class="panel form" [formGroup]="form" (ngSubmit)="step() === 3 ? save() : next()">
     @if (step() === 1) {
-      <h2>Vendor details</h2>
+      <h2 #stepHeading tabindex="-1">Vendor details</h2>
       <label>Supplier name<input formControlName="vendor_name" maxlength="120" required /></label>
       @if (form.controls.vendor_name.touched && form.controls.vendor_name.invalid) {
         <p role="alert">Enter a supplier name of 2 to 120 characters.</p>
@@ -44,7 +44,7 @@
       }
     }
     @if (step() === 2) {
-      <h2>Service & risk</h2>
+      <h2 #stepHeading tabindex="-1">Service & risk</h2>
       <label
         >Service category<select formControlName="service_category" (change)="checklist()">
           <option value="consulting">Consulting</option>
@@ -75,12 +75,15 @@
       >
     }
     @if (step() === 3) {
-      <h2>Evidence declarations</h2>
+      <h2 #stepHeading tabindex="-1">Evidence declarations</h2>
       <p>
         Check the items supplied with this request. Missing required evidence returns the request
         for changes on submission.
       </p>
       @if (required(); as checklist) {
+        <div class="evidence-count" aria-live="polite">
+          <strong>{{ declared() }} of {{ checklist.length }}</strong> required items declared
+        </div>
         <div formGroupName="evidence">
           @for (kind of kinds; track kind) {
             <label class="check"
@@ -100,7 +103,7 @@
     }
     <div class="actions">
       @if (step() > 1) {
-        <button type="button" (click)="step.set(step() - 1)">Back</button>
+        <button type="button" (click)="moveTo(step() - 1)">Back</button>
       }
       <button class="primary" type="submit" [disabled]="busy() || (step() === 3 && !required())">
         {{ step() === 3 ? (busy() ? 'Saving…' : 'Save draft') : 'Continue' }}

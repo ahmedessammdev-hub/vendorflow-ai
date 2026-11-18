@@ -1,10 +1,7 @@
 <div class="pagehead">
-  <div>
-    <p class="eyebrow">Procurement operations</p>
-    <h1>{{ queue ? 'Review queue' : 'Supplier workspace' }}</h1>
-  </div>
+  <h1>{{ queue ? 'Review queue' : 'Supplier workspace' }}</h1>
   @if (!queue && workspace.persona() === 'Requester') {
-    <a class="primary" routerLink="/requests/new">New request <span aria-hidden="true">＋</span></a>
+    <a class="primary" routerLink="/requests/new"><span aria-hidden="true">＋</span> New request</a>
   }
 </div>
 @if (error()) {
@@ -12,71 +9,123 @@
 }
 @if (data(); as result) {
   @if (!queue) {
-    <div class="stats">
-      <article>
-        <span>All requests</span><strong>{{ total() }}</strong>
-      </article>
-      <article>
-        <span>Awaiting approval</span><strong>{{ count('AWAITING_APPROVAL') }}</strong>
-      </article>
-      <article>
-        <span>Needs changes</span><strong>{{ count('NEEDS_CHANGES') }}</strong>
-      </article>
-      <article>
-        <span>Tickets created</span><strong>{{ count('JIRA_CREATED') }}</strong>
-      </article>
+    <div class="overview">
+      <section class="pipeline">
+        <div class="summary-head">
+          <h2>Request pipeline</h2>
+          <a routerLink="/queue">Open queue <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="volume">
+          <strong>{{ total() }}</strong> total requests
+        </div>
+        <div class="track" aria-hidden="true">
+          @for (g of pipeline(); track g.name) {
+            <i [style.width.%]="total() ? (100 * g.value) / total() : 0"></i>
+          }
+        </div>
+        <div class="pipeline-key">
+          @for (g of pipeline(); track g.name) {
+            <span
+              ><i aria-hidden="true"></i>{{ g.name }} <b>{{ g.value }}</b></span
+            >
+          }
+        </div>
+      </section>
+      <section class="mix">
+        <h2>Risk distribution</h2>
+        <div class="risk-bars">
+          @for (g of riskMix(); track g.band) {
+            <div>
+              <span>{{ label(g.band) }}</span><i aria-hidden="true"
+                ><em
+                  [attr.data-band]="g.band"
+                  [style.width.%]="total() ? (100 * g.value) / total() : 0"
+                ></em></i
+              ><b>{{ g.value }}</b>
+            </div>
+          }
+        </div>
+      </section>
     </div>
   }
-  <section class="panel">
-    <div class="sectionhead">
-      <h2>{{ queue ? 'Awaiting human approval' : 'Supplier requests' }}</h2>
-      @if (!queue) {
-        <label
-          >Status
-          <select #pick (change)="filter.set(pick.value)">
+  <section class="register">
+    <div class="register-head">
+      <h2>
+        {{ queue ? 'Awaiting human approval' : 'Supplier requests' }}
+        <span class="count">{{ visible().length }}</span>
+      </h2>
+      <div class="tools">
+        <label class="search"
+          ><span class="sr-only">Search suppliers</span
+          ><input
+            #search
+            type="search"
+            placeholder="Search suppliers…"
+            [value]="query()"
+            (input)="query.set(search.value)"
+        /></label>
+        @if (!queue) {
+          <label class="sr-only" for="request-status-filter">Status</label>
+          <select
+            id="request-status-filter"
+            #pick
+            [value]="filter()"
+            (change)="filter.set(pick.value)"
+          >
             <option value="">All statuses</option>
             @for (s of keys(result.counts); track s) {
-              <option [value]="s">{{ label(s) }}</option>
+              <option [value]="s">{{ label(s) }} ({{ result.counts[s] }})</option>
             }
-          </select></label
-        >
-      }
+          </select>
+        }
+      </div>
     </div>
-    <div class="scroll">
-      <table>
-        <thead>
+    <table class="register-table">
+      <thead>
+        <tr>
+          <th scope="col">Supplier</th>
+          <th scope="col">Risk</th>
+          <th scope="col">Status</th>
+          <th scope="col">Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of visible(); track row.id) {
           <tr>
-            <th>Supplier</th>
-            <th>Risk</th>
-            <th>Status</th>
-            <th>Updated</th>
+            <td class="supplier">
+              <div>
+                <i aria-hidden="true">{{ initials(row.vendor_name) }}</i>
+                <div>
+                  <a [routerLink]="['/requests', row.id]">{{ row.vendor_name }}</a><small
+                    >{{ label(row.service_category) }} · {{ row.requester_department }}</small
+                  >
+                </div>
+              </div>
+            </td>
+            <td><app-risk [risk]="row.risk" /></td>
+            <td><app-status [status]="row.status" /></td>
+            <td class="updated">
+              <time [attr.datetime]="row.updated_at">{{ row.updated_at | date: 'd MMM y' }}</time>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          @for (row of result.items; track row.id) {
-            @if (!filter() || filter() === row.status) {
-              <tr>
-                <td>
-                  <a [routerLink]="['/requests', row.id]">{{ row.vendor_name }}</a
-                  ><small>{{ label(row.service_category) }} · {{ row.requester_department }}</small>
-                </td>
-                <td><app-risk [risk]="row.risk" /></td>
-                <td><app-status [status]="row.status" /></td>
-                <td>{{ row.updated_at | date: 'mediumDate' }}</td>
-              </tr>
-            }
-          }
-        </tbody>
-      </table>
-    </div>
-    @if (!result.items.length || (filter() && !count(filter()))) {
-      <p class="empty">
-        {{
-          queue
-            ? 'No requests are waiting for a decision.'
-            : 'No supplier requests match this view.'
-        }}
-      </p>
+        }
+      </tbody>
+    </table>
+    @if (!visible().length) {
+      <div class="empty">
+        <p>
+          {{
+            query() || filter()
+              ? 'No suppliers match these filters.'
+              : queue
+                ? 'No requests are waiting for a decision.'
+                : 'No supplier requests yet.'
+          }}
+        </p>
+        @if (query() || filter()) {
+          <button (click)="query.set(''); filter.set('')">Clear filters</button>
+        }
+      </div>
     }
   </section>
 } @else if (!error()) {

@@ -20,6 +20,25 @@ export class RequestDetail implements OnDestroy {
   readonly busy = signal(false);
   readonly timedOut = signal(false);
   readonly label = label;
+  readonly milestones = ['Intake', 'Assessment', 'Human review', 'Jira delivery'];
+  stage(status: Schema['Status']): number {
+    switch (status) {
+      case 'DRAFT':
+      case 'NEEDS_CHANGES':
+        return 0;
+      case 'SUBMITTED':
+      case 'UNDER_REVIEW':
+        return 1;
+      case 'AWAITING_APPROVAL':
+      case 'APPROVED':
+      case 'REJECTED':
+        return 2;
+      case 'JIRA_PENDING':
+      case 'JIRA_CREATED':
+      case 'JIRA_FAILED':
+        return 3;
+    }
+  }
   readonly form = inject(FormBuilder).nonNullable.group({
     reviewer_label: [
       'Demo reviewer',

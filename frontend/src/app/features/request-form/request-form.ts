@@ -1,6 +1,16 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  Injector,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { failure, label, Schema, Workspace } from '../../core/workspace';
 
@@ -47,6 +57,18 @@ export class RequestForm {
       service_sla: false,
     }),
   });
+  private readonly injector = inject(Injector);
+  private readonly heading = viewChild<ElementRef<HTMLElement>>('stepHeading');
+  private readonly evidence = toSignal(this.form.controls.evidence.valueChanges, {
+    initialValue: this.form.controls.evidence.getRawValue(),
+  });
+  readonly declared = computed(
+    () => (this.required() ?? []).filter((kind) => this.evidence()[kind]).length,
+  );
+  moveTo(step: number) {
+    this.step.set(step);
+    afterNextRender(() => this.heading()?.nativeElement.focus(), { injector: this.injector });
+  }
   constructor() {
     if (this.id) void this.load();
     else void this.checklist();
@@ -101,7 +123,7 @@ export class RequestForm {
     const group =
       this.step() === 1 ? [c.vendor_name, c.requester_department] : [c.service_description];
     group.forEach((field) => field.markAsTouched());
-    if (group.every((field) => field.valid)) this.step.update((n) => n + 1);
+    if (group.every((field) => field.valid)) this.moveTo(this.step() + 1);
   }
   async save() {
     if (this.busy() || this.form.invalid || this.ws.persona() !== 'Requester') return;

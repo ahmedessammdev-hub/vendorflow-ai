@@ -7,7 +7,6 @@ import { failure, label, Schema, Workspace } from '../../core/workspace';
   imports: [KeyValuePipe],
   template: ` <div class="pagehead">
       <div>
-        <p class="eyebrow">Workspace activity</p>
         <h1>Metrics</h1>
       </div>
       <button (click)="load()">Refresh</button>
@@ -27,13 +26,12 @@ import { failure, label, Schema, Workspace } from '../../core/workspace';
           <span>p95 latency (ms)</span><strong>{{ m.latency_p95_ms ?? '—' }}</strong>
         </article>
       </div>
-      <div class="grid">
+      <div class="metrics-grid">
         <section class="panel">
           <h2>Requests by status</h2>
           @for (r of m.requests | keyvalue; track r.key) {
             <p class="pair">
-              <span>{{ label(r.key) }}</span
-              ><b>{{ r.value }}</b>
+              <span>{{ label(r.key) }}</span><b>{{ r.value }}</b>
             </p>
           } @empty {
             <p>No requests yet.</p>
@@ -43,8 +41,7 @@ import { failure, label, Schema, Workspace } from '../../core/workspace';
           <h2>Jira operations</h2>
           @for (r of m.jira | keyvalue; track r.key) {
             <p class="pair">
-              <span>{{ label(r.key) }}</span
-              ><b>{{ r.value }}</b>
+              <span>{{ label(r.key) }}</span><b>{{ r.value }}</b>
             </p>
           } @empty {
             <p>No delivery attempts yet.</p>

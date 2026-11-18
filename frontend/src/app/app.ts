@@ -1,13 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+
 import { Workspace } from './core/workspace';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import type { components } from './core/api.generated';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, MatButtonModule],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
@@ -21,11 +21,19 @@ export class App {
     this.loadModes();
   }
 
+  protected focusContent(event: Event): void {
+    event.preventDefault();
+    document.getElementById('content')?.focus();
+  }
+
   protected loadModes(): void {
     this.failed.set(false);
-    this.http.get<components['schemas']['IntegrationModes']>('/api/settings/integrations', {timeout: 8000})
+    this.http
+      .get<components['schemas']['IntegrationModes']>('/api/settings/integrations', {
+        timeout: 8000,
+      })
       .subscribe({
-        next: modes => this.modes.set(modes),
+        next: (modes) => this.modes.set(modes),
         error: () => this.failed.set(true),
       });
   }

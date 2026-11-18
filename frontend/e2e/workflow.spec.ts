@@ -70,6 +70,17 @@ test('Cedar approval creates one simulated issue and survives reload', async ({ 
   await page.getByRole('link', { name: 'Dashboard', exact: true }).first().click();
   await expect(page.getByRole('link', { name: 'Cedar Cloud Services' })).toBeVisible();
   await capture(page, 'dashboard');
+  const search = page.getByRole('searchbox', { name: 'Search suppliers' });
+  const status = page.getByRole('combobox', { name: 'Status', exact: true });
+  await status.selectOption('JIRA_CREATED');
+  await search.fill('cedar');
+  await expect(page.getByRole('link', { name: 'Cedar Cloud Services' })).toBeVisible();
+  await status.selectOption('DRAFT');
+  await expect(page.getByText('No suppliers match these filters.')).toBeVisible();
+  await page.getByRole('button', { name: 'Clear filters' }).click();
+  await expect(search).toHaveValue('');
+  await expect(status).toHaveValue('');
+  await expect(page.getByRole('link', { name: 'Cedar Cloud Services' })).toBeVisible();
 });
 
 test('Northstar corrects missing evidence, reaches review and is rejected without Jira', async ({
