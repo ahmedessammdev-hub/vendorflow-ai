@@ -74,7 +74,7 @@ def table(rows: list[tuple[str, str, str, str]]) -> str:
 def collect() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     sha = run(ROOT, ["git", "rev-parse", "HEAD"], "sha").strip()
-    node = run(ROOT, ["node", "-v"], "node").strip()
+    node_version = run(ROOT, ["node", "-v"], "node").strip()
     for args in [
         ["ruff", "check", ".", "../scripts"],
         ["ruff", "format", "--check", ".", "../scripts"],
@@ -262,6 +262,15 @@ def collect() -> None:
         ]:
             row(title, "NOT MEASURED on full set — " + reason, target)
     if attempted:
+        ok_count = sum(case["status"] == "OK" for case in ev["cases"])
+        gate_count = sum(case["human_gate"] for case in ev["cases"])
+        row("Complete validated live assessments", f"{ok_count}/{attempted}", "report")
+        row(
+            "Live cases stopped for human approval",
+            f"{gate_count}/{attempted}",
+            "all cases",
+            gate_count == attempted,
+        )
         for node in ("intake_summary", "recommendation"):
             delivered = sum(
                 any(c["node"] == node and c["outcome"] == "OK" for c in case["calls"])
@@ -326,7 +335,7 @@ def collect() -> None:
     )
     row("VF-08 real Jira", "SKIPPED — no authorized live Jira site or issue", "opt-in")
     stamp = datetime.now(UTC).isoformat(timespec="seconds")
-    meta = f"Generated {stamp} at commit `{sha}`. {platform.platform()}, {platform.machine()}, Python {platform.python_version()}, Node {node}.\n\n"
+    meta = f"Generated {stamp} at commit `{sha}`. {platform.platform()}, {platform.machine()}, Python {platform.python_version()}, Node {node_version}.\n\n"
     meta += f"Local gates use Jira simulation. Randomized tests and load measurements use offline or fixture AI. Load measurements use {load['samples']} observations per endpoint through in-process ASGI and include background work. The separate live evaluation used {ev.get('model', 'no model')} at `{ev.get('sha', 'unavailable')}`, {attempted}/20 cases attempted.\n\n"
     report = "# VendorFlow verification and measurements\n\n" + meta + table(ROWS)
     report += (

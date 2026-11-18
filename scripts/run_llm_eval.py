@@ -148,6 +148,9 @@ def quantile(values: list[int | float], fraction: float) -> float | None:
 
 async def evaluate(output: Path, all_cases: bool) -> None:
     items = cases()
+    revision = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
     cfg = Settings()
     if not cfg.llm_configured:
         raise SystemExit("No configured model. No live evaluation was sent.")
@@ -196,9 +199,7 @@ async def evaluate(output: Path, all_cases: bool) -> None:
         }
     report = {
         "utc": datetime.now(UTC).isoformat(),
-        "sha": subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-        ).strip(),
+        "sha": revision,
         "model": cfg.llm_model,
         "timeout_seconds": cfg.llm_timeout_seconds,
         "reasoning_effort": cfg.llm_reasoning_effort,

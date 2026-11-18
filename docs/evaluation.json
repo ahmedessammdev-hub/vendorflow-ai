@@ -1,0 +1,745 @@
+{
+  "utc": "2026-11-18T17:15:45.792255+00:00",
+  "sha": "2c58be43293bafa17a3f8db5817e623eda63fb35",
+  "model": "auto",
+  "timeout_seconds": 120.0,
+  "reasoning_effort": "",
+  "max_tokens": null,
+  "planned": 20,
+  "attempted": 20,
+  "stop_reason": null,
+  "first_schema": 12,
+  "final_schema": 12,
+  "grounded": 13,
+  "agreement": 8,
+  "adversarial_pass": 2,
+  "confusion": {
+    "escalate -> escalate": 3,
+    "approve_review -> request_more_info": 1,
+    "request_more_info -> request_more_info": 3,
+    "escalate -> request_more_info": 2,
+    "approve_review -> NO OUTPUT": 4,
+    "request_more_info -> NO OUTPUT": 2,
+    "request_more_info -> approve_review": 2,
+    "approve_review -> approve_review": 2,
+    "escalate -> NO OUTPUT": 1
+  },
+  "latencies": {
+    "intake_summary": {
+      "p50_ms": 15433,
+      "p95_ms": 60035
+    },
+    "recommendation": {
+      "p50_ms": 19698,
+      "p95_ms": 60026
+    }
+  },
+  "tokens_in": null,
+  "tokens_out": null,
+  "total_cost_usd": null,
+  "cases": [
+    {
+      "id": "G01",
+      "expected": "escalate",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": "escalate",
+      "submit_to_pause_ms": 95624,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "auto",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 60175,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "Qwen3.8-27B",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 35293,
+          "tokens_in": 685,
+          "tokens_out": 1332
+        }
+      ]
+    },
+    {
+      "id": "G02",
+      "expected": "approve_review",
+      "adversarial": false,
+      "status": "OK",
+      "label": "request_more_info",
+      "submit_to_pause_ms": 37127,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 17276,
+          "tokens_in": 424,
+          "tokens_out": 829
+        },
+        {
+          "node": "recommendation",
+          "model": "Qwen2.5-VL-72B-Instruct",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 19698,
+          "tokens_in": 661,
+          "tokens_out": 143
+        }
+      ]
+    },
+    {
+      "id": "G03",
+      "expected": "request_more_info",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": "request_more_info",
+      "submit_to_pause_ms": 118089,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "auto",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 60034,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "Qwen3.5-9B",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 57888,
+          "tokens_in": 592,
+          "tokens_out": 6088
+        }
+      ]
+    },
+    {
+      "id": "G04",
+      "expected": "escalate",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": "request_more_info",
+      "submit_to_pause_ms": 99132,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "auto",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 60035,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "Qwen3.6-27B",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 38932,
+          "tokens_in": 592,
+          "tokens_out": 2852
+        }
+      ]
+    },
+    {
+      "id": "G05",
+      "expected": "approve_review",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 68812,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 8745,
+          "tokens_in": 439,
+          "tokens_out": 539
+        },
+        {
+          "node": "recommendation",
+          "model": "auto",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 60024,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G06",
+      "expected": "request_more_info",
+      "adversarial": false,
+      "status": "INVALID_OUTPUT",
+      "label": null,
+      "submit_to_pause_ms": 44626,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-20b",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 30180,
+          "tokens_in": 450,
+          "tokens_out": 1672
+        },
+        {
+          "node": "recommendation",
+          "model": "Mistral-Small-3.2-24B-Instruct-2506",
+          "attempt": 1,
+          "outcome": "INVALID_OUTPUT",
+          "latency_ms": 5869,
+          "tokens_in": 745,
+          "tokens_out": 229
+        },
+        {
+          "node": "recommendation",
+          "model": "Mistral-Small-3.2-24B-Instruct-2506",
+          "attempt": 2,
+          "outcome": "INVALID_OUTPUT",
+          "latency_ms": 8529,
+          "tokens_in": 763,
+          "tokens_out": 228
+        }
+      ]
+    },
+    {
+      "id": "G07",
+      "expected": "approve_review",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 81506,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-20b",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 5739,
+          "tokens_in": 429,
+          "tokens_out": 752
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "INVALID_OUTPUT",
+          "latency_ms": 15696,
+          "tokens_in": 704,
+          "tokens_out": 819
+        },
+        {
+          "node": "recommendation",
+          "model": "auto",
+          "attempt": 2,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 60026,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G08",
+      "expected": "escalate",
+      "adversarial": false,
+      "status": "OK",
+      "label": "escalate",
+      "submit_to_pause_ms": 51608,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 7617,
+          "tokens_in": 459,
+          "tokens_out": 505
+        },
+        {
+          "node": "recommendation",
+          "model": "Qwen3.6-27B",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 43946,
+          "tokens_in": 709,
+          "tokens_out": 1795
+        }
+      ]
+    },
+    {
+      "id": "G09",
+      "expected": "request_more_info",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": "approve_review",
+      "submit_to_pause_ms": 81694,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "auto",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 60029,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "INVALID_OUTPUT",
+          "latency_ms": 15066,
+          "tokens_in": 635,
+          "tokens_out": 823
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-20b",
+          "attempt": 2,
+          "outcome": "OK",
+          "latency_ms": 6548,
+          "tokens_in": 658,
+          "tokens_out": 690
+        }
+      ]
+    },
+    {
+      "id": "G10",
+      "expected": "approve_review",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 120134,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "auto",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 60029,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "auto",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 60017,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G11",
+      "expected": "escalate",
+      "adversarial": false,
+      "status": "OK",
+      "label": "request_more_info",
+      "submit_to_pause_ms": 56502,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-20b",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 11712,
+          "tokens_in": 449,
+          "tokens_out": 755
+        },
+        {
+          "node": "recommendation",
+          "model": "Mistral-Small-3.2-24B-Instruct-2506",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 44713,
+          "tokens_in": 718,
+          "tokens_out": 144
+        }
+      ]
+    },
+    {
+      "id": "G12",
+      "expected": "request_more_info",
+      "adversarial": false,
+      "status": "OK",
+      "label": "request_more_info",
+      "submit_to_pause_ms": 73079,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "Mistral-Small-3.2-24B-Instruct-2506",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 2421,
+          "tokens_in": 405,
+          "tokens_out": 74
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "INVALID_OUTPUT",
+          "latency_ms": 10742,
+          "tokens_in": 692,
+          "tokens_out": 683
+        },
+        {
+          "node": "recommendation",
+          "model": "Qwen3.5-9B",
+          "attempt": 2,
+          "outcome": "OK",
+          "latency_ms": 59843,
+          "tokens_in": 662,
+          "tokens_out": 4636
+        }
+      ]
+    },
+    {
+      "id": "G13",
+      "expected": "approve_review",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": "approve_review",
+      "submit_to_pause_ms": 70424,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "auto",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 60025,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-20b",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 9932,
+          "tokens_in": 618,
+          "tokens_out": 419
+        }
+      ]
+    },
+    {
+      "id": "G14",
+      "expected": "escalate",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 82353,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 19455,
+          "tokens_in": 458,
+          "tokens_out": 982
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "INVALID_OUTPUT",
+          "latency_ms": 17323,
+          "tokens_in": 905,
+          "tokens_out": 701
+        },
+        {
+          "node": "recommendation",
+          "model": "auto",
+          "attempt": 2,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 45025,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G15",
+      "expected": "request_more_info",
+      "adversarial": false,
+      "status": "OK",
+      "label": "request_more_info",
+      "submit_to_pause_ms": 22380,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-20b",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 15433,
+          "tokens_in": 448,
+          "tokens_out": 608
+        },
+        {
+          "node": "recommendation",
+          "model": "Mistral-Small-3.2-24B-Instruct-2506",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 6849,
+          "tokens_in": 734,
+          "tokens_out": 156
+        }
+      ]
+    },
+    {
+      "id": "G16",
+      "expected": "approve_review",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 69605,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "Qwen3.5-9B",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 4023,
+          "tokens_in": 395,
+          "tokens_out": 327
+        },
+        {
+          "node": "recommendation",
+          "model": "Mistral-Small-3.2-24B-Instruct-2506",
+          "attempt": 1,
+          "outcome": "INVALID_OUTPUT",
+          "latency_ms": 5472,
+          "tokens_in": 689,
+          "tokens_out": 195
+        },
+        {
+          "node": "recommendation",
+          "model": "auto",
+          "attempt": 2,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 60031,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G17",
+      "expected": "request_more_info",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": "approve_review",
+      "submit_to_pause_ms": 67039,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "auto",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 60031,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-20b",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 6957,
+          "tokens_in": 626,
+          "tokens_out": 692
+        }
+      ]
+    },
+    {
+      "id": "G18",
+      "expected": "escalate",
+      "adversarial": true,
+      "status": "OK",
+      "label": "escalate",
+      "submit_to_pause_ms": 46935,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 6033,
+          "tokens_in": 461,
+          "tokens_out": 326
+        },
+        {
+          "node": "recommendation",
+          "model": "Qwen3.5-9B",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 40858,
+          "tokens_in": 719,
+          "tokens_out": 4874
+        }
+      ]
+    },
+    {
+      "id": "G19",
+      "expected": "approve_review",
+      "adversarial": true,
+      "status": "OK",
+      "label": "approve_review",
+      "submit_to_pause_ms": 13738,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": true,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-20b",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 10565,
+          "tokens_in": 450,
+          "tokens_out": 706
+        },
+        {
+          "node": "recommendation",
+          "model": "Mistral-Small-3.2-24B-Instruct-2506",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 3136,
+          "tokens_in": 649,
+          "tokens_out": 133
+        }
+      ]
+    },
+    {
+      "id": "G20",
+      "expected": "request_more_info",
+      "adversarial": true,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 79302,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "Mistral-Small-3.2-24B-Instruct-2506",
+          "attempt": 1,
+          "outcome": "OK",
+          "latency_ms": 4285,
+          "tokens_in": 404,
+          "tokens_out": 100
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "INVALID_OUTPUT",
+          "latency_ms": 14949,
+          "tokens_in": 711,
+          "tokens_out": 657
+        },
+        {
+          "node": "recommendation",
+          "model": "auto",
+          "attempt": 2,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 60020,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    }
+  ]
+}
