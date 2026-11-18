@@ -13,6 +13,7 @@ from app.agents.nodes import ReviewNodes
 from app.api import audit, health, jira, metrics, requests, review, settings
 from app.core.config import Settings
 from app.core.limits import BodyLimit
+from app.core.logging import RequestLog
 from app.integration.dispatcher import Dispatcher
 from app.integration.jira_client import JiraClient, LiveJira
 from app.integration.jira_sim import SimulatedJira
@@ -66,6 +67,7 @@ def create_app(
     application.state.settings = config
     application.state.engine = engine
     application.add_middleware(BodyLimit)
+    application.add_middleware(RequestLog, settings=config)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:4200"],

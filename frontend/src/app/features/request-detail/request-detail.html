@@ -1,24 +1,180 @@
 <a class="back" routerLink="/">← Dashboard</a>
-@if(error()){<p class="notice" role="alert">{{ error() }} <button (click)="refresh()">Reload request</button></p>}
-@if(row(); as r){
-<div class="pagehead"><div><p class="eyebrow">{{ r.requester_department }} / Supplier request</p><h1>{{ r.vendor_name }}</h1><app-status [status]="r.status"/></div>
-@if(ws.persona()==='Requester' && (r.status==='DRAFT' || r.status==='NEEDS_CHANGES')){<div class="actions"><a class="button" [routerLink]="['/requests',r.id,'edit']">Edit request</a><button class="primary" [disabled]="busy()" (click)="act('submit')">Submit for review</button></div>}</div>
-@if(r.status==='UNDER_REVIEW' || r.status==='JIRA_PENDING'){<p class="notice" role="status">@if(timedOut()){Updates paused after 60 seconds. <button (click)="refresh()">Check again</button>} @else {Working on this request. Updates appear automatically.}</p>}
-<div class="grid"><section class="panel"><h2>Service profile</h2><p>{{ r.service_description }}</p><p class="pair">Category <b>{{ label(r.service_category) }}</b></p><p class="pair">Criticality <b>{{ label(r.business_criticality) }}</b></p><p class="pair">Sensitive data <b>{{r.sensitive_data_access ? 'Yes':'No'}}</b></p></section>
-<section class="panel"><h2>Illustrative risk</h2><app-risk [risk]="r.risk"/>@for(f of r.risk.factors;track f.field){<p class="pair">{{ f.reason }} <b>+{{ f.points }}</b></p>}</section>
-<section class="panel"><h2>Evidence</h2>@for(kind of r.required_evidence;track kind){<p class="pair">{{ label(kind) }} <b>{{ r.missing_evidence.includes(kind) ? 'Missing' : 'Declared' }}</b></p>}
-@for(item of r.evidence;track item.kind){@if(!r.required_evidence.includes(item.kind) && item.present){<p class="pair">{{label(item.kind)}} <b>Declared · optional</b></p>} @if(item.pointer){<small>{{label(item.kind)}} · {{item.pointer}}</small>}}</section>
-<section class="panel"><h2>AI assessment</h2>@if(r.assessment; as a){<p><b>{{ a.ai_status === 'OK' ? 'Available' : label(a.ai_status) }}</b> · {{ a.model || 'Model unavailable' }}</p>@if(a.summary;as s){<h3>{{ s.what_is_requested }}</h3><p>{{ s.service_description }}</p><p>{{ s.evidence_summary }}</p>@for(m of s.missing_information;track $index){<p>{{m}}</p>}}
-@if(a.recommendation;as rec){<h3>{{ label(rec.recommendation) }}</h3><p>{{rec.justification}}</p>@for(c of rec.citations;track $index){<p class="pair">{{label(c.field)}} <b>{{c.value}}</b></p>}<small>{{rec.caution}}</small>}
-<p>AI advice requires human review.</p>} @else {<p>No assessment recorded yet.</p>}</section></div>
-@if(r.status==='AWAITING_APPROVAL'){<section class="panel"><h2>Human review</h2>@if(ws.persona()==='Reviewer'){
-<div class="form" [formGroup]="form"><label>Reviewer name<input formControlName="reviewer_label" maxlength="120" required></label><label>Decision reason<textarea formControlName="reason" maxlength="4000" required></textarea></label>
-@if(form.touched && form.invalid){<p role="alert">Enter your name and a decision reason.</p>}
-<div class="actions"><button class="primary" [disabled]="busy()" (click)="act('decision','approve')">Approve</button><button [disabled]="busy()" (click)="act('decision','request_changes')">Request changes</button><button class="danger" [disabled]="busy()" (click)="act('decision','reject')">Reject</button></div></div>} @else {<p>Switch to the Reviewer persona to record a decision.</p>}</section>}
-<section class="panel"><h2>Jira delivery</h2>@if(r.jira;as j){<p><b>{{j.mode==='simulation' ? 'Simulated' : 'Live'}}</b> · {{j.status==='UNCERTAIN' ? 'Needs reconciliation' : label(j.status)}}</p>
-@if(j.issue_url && j.mode==='live' && !j.issue_key?.startsWith('SIM-')){<a [href]="j.issue_url" target="_blank" rel="noopener">{{j.issue_key}}</a>} @else if(j.issue_key){<strong>{{ j.issue_key }}</strong>}
-@if(j.last_error){<p>{{j.last_error}}</p>} @if(j.retry_at){<p>Earliest retry {{j.retry_at | date:'medium'}}</p>}
-@if(ws.persona()==='Reviewer' && (j.status==='UNCERTAIN' || j.status==='FAILED')){<div class="form" [formGroup]="form"><label>Reviewer name<input formControlName="reviewer_label" required></label>@if(j.status==='UNCERTAIN'){<label class="check"><input type="checkbox" formControlName="confirmed">I checked Jira and no issue exists</label>}<button [disabled]="busy()" (click)="act('jira/reconcile')">Reconcile delivery</button></div>}
-} @else {<p>No Jira operation recorded.</p>}</section>
-<section class="panel"><h2>Audit timeline</h2><ol class="timeline">@for(e of events();track e.id){<li><strong>{{label(e.to_status)}}</strong> · {{label(e.event_type)}}<small>{{e.created_at | date:'medium'}} · {{label(e.actor_type)}}</small>@if(e.detail['reason']){<p>{{e.detail['reason']}}</p>}</li>}</ol></section>
-} @else if(!error()){<div class="skeleton" role="status">Loading request…</div>}
+@if (error()) {
+  <p class="notice" role="alert">
+    {{ error() }} <button (click)="refresh()">Reload request</button>
+  </p>
+}
+@if (row(); as r) {
+  <div class="pagehead">
+    <div>
+      <p class="eyebrow">{{ r.requester_department }} / Supplier request</p>
+      <h1>{{ r.vendor_name }}</h1>
+      <app-status [status]="r.status" />
+    </div>
+    @if (ws.persona() === 'Requester' && (r.status === 'DRAFT' || r.status === 'NEEDS_CHANGES')) {
+      <div class="actions">
+        <a class="button" [routerLink]="['/requests', r.id, 'edit']">Edit request</a
+        ><button class="primary" [disabled]="busy()" (click)="act('submit')">
+          Submit for review
+        </button>
+      </div>
+    }
+  </div>
+  @if (r.status === 'UNDER_REVIEW' || r.status === 'JIRA_PENDING') {
+    <p class="notice" role="status">
+      @if (timedOut()) {
+        Updates paused after 60 seconds. <button (click)="refresh()">Check again</button>
+      } @else {
+        Working on this request. Updates appear automatically.
+      }
+    </p>
+  }
+  <div class="grid">
+    <section class="panel">
+      <h2>Service profile</h2>
+      <p>{{ r.service_description }}</p>
+      <p class="pair">
+        Category <b>{{ label(r.service_category) }}</b>
+      </p>
+      <p class="pair">
+        Criticality <b>{{ label(r.business_criticality) }}</b>
+      </p>
+      <p class="pair">
+        Sensitive data <b>{{ r.sensitive_data_access ? 'Yes' : 'No' }}</b>
+      </p>
+    </section>
+    <section class="panel">
+      <h2>Illustrative risk</h2>
+      <app-risk [risk]="r.risk" />
+      @for (f of r.risk.factors; track f.field) {
+        <p class="pair">
+          {{ f.reason }} <b>+{{ f.points }}</b>
+        </p>
+      }
+    </section>
+    <section class="panel">
+      <h2>Evidence</h2>
+      @for (kind of r.required_evidence; track kind) {
+        <p class="pair">
+          {{ label(kind) }} <b>{{ r.missing_evidence.includes(kind) ? 'Missing' : 'Declared' }}</b>
+        </p>
+      }
+      @for (item of r.evidence; track item.kind) {
+        @if (!r.required_evidence.includes(item.kind) && item.present) {
+          <p class="pair">{{ label(item.kind) }} <b>Declared · optional</b></p>
+        }
+        @if (item.pointer) {
+          <small>{{ label(item.kind) }} · {{ item.pointer }}</small>
+        }
+      }
+    </section>
+    <section class="panel">
+      <h2>AI assessment</h2>
+      @if (r.assessment; as a) {
+        <p>
+          <b>{{ a.ai_status === 'OK' ? 'Available' : label(a.ai_status) }}</b> ·
+          {{ a.model || 'Model unavailable' }}
+        </p>
+        @if (a.summary; as s) {
+          <h3>{{ s.what_is_requested }}</h3>
+          <p>{{ s.service_description }}</p>
+          <p>{{ s.evidence_summary }}</p>
+          @for (m of s.missing_information; track $index) {
+            <p>{{ m }}</p>
+          }
+        }
+        @if (a.recommendation; as rec) {
+          <h3>{{ label(rec.recommendation) }}</h3>
+          <p>{{ rec.justification }}</p>
+          @for (c of rec.citations; track $index) {
+            <p class="pair">
+              {{ label(c.field) }} <b>{{ c.value }}</b>
+            </p>
+          }
+          <small>{{ rec.caution }}</small>
+        }
+        <p>AI advice requires human review.</p>
+      } @else {
+        <p>No assessment recorded yet.</p>
+      }
+    </section>
+  </div>
+  @if (r.status === 'AWAITING_APPROVAL') {
+    <section class="panel">
+      <h2>Human review</h2>
+      @if (ws.persona() === 'Reviewer') {
+        <div class="form" [formGroup]="form">
+          <label
+            >Reviewer name<input formControlName="reviewer_label" maxlength="120" required /></label
+          ><label
+            >Decision reason<textarea formControlName="reason" maxlength="4000" required></textarea>
+          </label>
+          @if (form.touched && form.invalid) {
+            <p role="alert">Enter your name and a decision reason.</p>
+          }
+          <div class="actions">
+            <button class="primary" [disabled]="busy()" (click)="act('decision', 'approve')">
+              Approve</button
+            ><button [disabled]="busy()" (click)="act('decision', 'request_changes')">
+              Request changes</button
+            ><button class="danger" [disabled]="busy()" (click)="act('decision', 'reject')">
+              Reject
+            </button>
+          </div>
+        </div>
+      } @else {
+        <p>Switch to the Reviewer persona to record a decision.</p>
+      }
+    </section>
+  }
+  <section class="panel">
+    <h2>Jira delivery</h2>
+    @if (r.jira; as j) {
+      <p>
+        <b>{{ j.mode === 'simulation' ? 'Simulated' : 'Live' }}</b> ·
+        {{ j.status === 'UNCERTAIN' ? 'Needs reconciliation' : label(j.status) }}
+      </p>
+      @if (j.issue_url && j.mode === 'live' && !j.issue_key?.startsWith('SIM-')) {
+        <a [href]="j.issue_url" target="_blank" rel="noopener">{{ j.issue_key }}</a>
+      } @else if (j.issue_key) {
+        <strong>{{ j.issue_key }}</strong>
+      }
+      @if (j.last_error) {
+        <p>{{ j.last_error }}</p>
+      }
+      @if (j.retry_at) {
+        <p>Earliest retry {{ j.retry_at | date: 'medium' }}</p>
+      }
+      @if (ws.persona() === 'Reviewer' && (j.status === 'UNCERTAIN' || j.status === 'FAILED')) {
+        <div class="form" [formGroup]="form">
+          <label>Reviewer name<input formControlName="reviewer_label" required /></label>
+          @if (j.status === 'UNCERTAIN') {
+            <label class="check"
+              ><input type="checkbox" formControlName="confirmed" />I checked Jira and no issue
+              exists</label
+            >
+          }
+          <button [disabled]="busy()" (click)="act('jira/reconcile')">Reconcile delivery</button>
+        </div>
+      }
+    } @else {
+      <p>No Jira operation recorded.</p>
+    }
+  </section>
+  <section class="panel">
+    <h2>Audit timeline</h2>
+    <ol class="timeline">
+      @for (e of events(); track e.id) {
+        <li>
+          <strong>{{ label(e.to_status) }}</strong> · {{ label(e.event_type)
+          }}<small>{{ e.created_at | date: 'medium' }} · {{ label(e.actor_type) }}</small>
+          @if (e.detail['reason']) {
+            <p>{{ e.detail['reason'] }}</p>
+          }
+        </li>
+      }
+    </ol>
+  </section>
+} @else if (!error()) {
+  <div class="skeleton" role="status">Loading request…</div>
+}

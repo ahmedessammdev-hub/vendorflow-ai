@@ -5,7 +5,8 @@ import { Workspace, Schema, label, failure } from '../../core/workspace';
 import { StatusBadge, RiskBadge } from '../../shared/badges';
 
 @Component({
-  selector: 'app-dashboard', imports: [RouterLink, DatePipe, StatusBadge, RiskBadge],
+  selector: 'app-dashboard',
+  imports: [RouterLink, DatePipe, StatusBadge, RiskBadge],
   templateUrl: './dashboard.html',
 })
 export class Dashboard {
@@ -16,13 +17,25 @@ export class Dashboard {
   readonly filter = signal('');
   readonly label = label;
   readonly keys = Object.keys;
-  constructor() { void this.load(); }
+  constructor() {
+    void this.load();
+  }
   async load() {
     this.error.set('');
     try {
-      this.data.set(await this.workspace.get<Schema['RequestList']>('requests' + (this.queue ? '?status=AWAITING_APPROVAL' : '')));
-    } catch (err) { this.error.set(failure(err)); }
+      this.data.set(
+        await this.workspace.get<Schema['RequestList']>(
+          'requests' + (this.queue ? '?status=AWAITING_APPROVAL' : ''),
+        ),
+      );
+    } catch (err) {
+      this.error.set(failure(err));
+    }
   }
-  count(status: string) { return this.data()?.counts[status] ?? 0; }
-  total() { return Object.values(this.data()?.counts ?? {}).reduce((a,b) => a + (b ?? 0),0); }
+  count(status: string) {
+    return this.data()?.counts[status] ?? 0;
+  }
+  total() {
+    return Object.values(this.data()?.counts ?? {}).reduce((a, b) => a + (b ?? 0), 0);
+  }
 }

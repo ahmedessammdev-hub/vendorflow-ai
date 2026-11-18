@@ -37,8 +37,12 @@ def test_vf05_vf09_vf10_random_action_sequences(
     lifespan = app.router.lifespan_context(app)
     run_async(lifespan.__aenter__())
 
+    sequences = 0
+
     class Workflow(RuleBasedStateMachine):
         def __init__(self) -> None:
+            nonlocal sequences
+            sequences += 1
             super().__init__()
             draft = run_async(
                 http.post(
@@ -162,6 +166,7 @@ def test_vf05_vf09_vf10_random_action_sequences(
                 suppress_health_check=[HealthCheck.too_slow],
             ),
         )
+        print(f"Property sequences completed: {sequences}")
     finally:
         run_async(http.aclose())
         run_async(lifespan.__aexit__(None, None, None))

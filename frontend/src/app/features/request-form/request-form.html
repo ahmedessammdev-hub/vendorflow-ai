@@ -1,26 +1,110 @@
-<a class="back" routerLink="/">← Dashboard</a><div class="pagehead"><div><p class="eyebrow">Supplier intake</p><h1>{{ id ? 'Edit request' : 'New request' }}</h1></div></div>
-@if (error()) {<p class="notice" role="alert">{{ error() }} @if(id && !base()){<button (click)="load()">Retry</button>}</p>}
-@if (ws.persona() !== 'Requester') {<p class="notice">Switch to the Requester persona to enter supplier details.</p>}
-@else if(id && !base()){<div class="skeleton" role="status">Loading request…</div>}
-@else if(base() && base()?.status !== 'DRAFT' && base()?.status !== 'NEEDS_CHANGES') {<p class="notice">This request has moved past editing. <a [routerLink]="['/requests',id]">View request</a></p>}
-@else {
-<ol class="steps">@for (title of ['Vendor','Service & risk','Evidence']; track title; let i = $index){<li [attr.aria-current]="i+1===step() ? 'step' : null">{{ i+1 }} · {{ title }}</li>}</ol>
-<form class="panel form" [formGroup]="form" (ngSubmit)="step() === 3 ? save() : next()">
-@if(step() === 1){
-<h2>Vendor details</h2><label>Supplier name<input formControlName="vendor_name" maxlength="120" required></label>
-@if(form.controls.vendor_name.touched && form.controls.vendor_name.invalid){<p role="alert">Enter a supplier name of 2 to 120 characters.</p>}
-<label>Requester department<input formControlName="requester_department" maxlength="120" required></label>
-@if(form.controls.requester_department.touched && form.controls.requester_department.invalid){<p role="alert">Enter the requesting department.</p>}
+<a class="back" routerLink="/">← Dashboard</a>
+<div class="pagehead">
+  <div>
+    <p class="eyebrow">Supplier intake</p>
+    <h1>{{ id ? 'Edit request' : 'New request' }}</h1>
+  </div>
+</div>
+@if (error()) {
+  <p class="notice" role="alert">
+    {{ error() }}
+    @if (id && !base()) {
+      <button (click)="load()">Retry</button>
+    }
+  </p>
 }
-@if(step() === 2){<h2>Service & risk</h2>
-<label>Service category<select formControlName="service_category" (change)="checklist()"><option value="consulting">Consulting</option><option value="software">Software</option><option value="cloud_hosting">Cloud hosting</option></select></label>
-<label>Business criticality<select formControlName="business_criticality" (change)="checklist()"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
-<label>Service description<textarea formControlName="service_description" required maxlength="4000"></textarea></label>
-@if(form.controls.service_description.touched && form.controls.service_description.invalid){<p role="alert">Describe the service in up to 4,000 characters.</p>}
-<label class="check"><input type="checkbox" formControlName="sensitive_data_access">Access to sensitive data</label>}
-@if(step() === 3){<h2>Evidence declarations</h2><p>Check the items supplied with this request. Missing required evidence returns the request for changes on submission.</p>
-@if(required(); as checklist){<div formGroupName="evidence">@for(kind of kinds; track kind){<label class="check"><input type="checkbox" [formControlName]="kind">{{ label(kind) }} <small>{{ checklist.includes(kind) ? 'Required' : 'Optional' }}</small></label>}</div>}
-@else if(checklistError()){<p role="alert">Could not load evidence requirements. <button type="button" (click)="checklist()">Retry</button></p>}
-@else {<p role="status">Loading checklist…</p>}}
-<div class="actions">@if(step()>1){<button type="button" (click)="step.set(step()-1)">Back</button>}
-<button class="primary" type="submit" [disabled]="busy() || (step()===3 && !required())">{{ step()===3 ? (busy() ? 'Saving…' : 'Save draft') : 'Continue' }}</button></div></form>}
+@if (ws.persona() !== 'Requester') {
+  <p class="notice">Switch to the Requester persona to enter supplier details.</p>
+} @else if (id && !base()) {
+  <div class="skeleton" role="status">Loading request…</div>
+} @else if (base() && base()?.status !== 'DRAFT' && base()?.status !== 'NEEDS_CHANGES') {
+  <p class="notice">
+    This request has moved past editing. <a [routerLink]="['/requests', id]">View request</a>
+  </p>
+} @else {
+  <ol class="steps">
+    @for (title of ['Vendor', 'Service & risk', 'Evidence']; track title; let i = $index) {
+      <li [attr.aria-current]="i + 1 === step() ? 'step' : null">{{ i + 1 }} · {{ title }}</li>
+    }
+  </ol>
+  <form class="panel form" [formGroup]="form" (ngSubmit)="step() === 3 ? save() : next()">
+    @if (step() === 1) {
+      <h2>Vendor details</h2>
+      <label>Supplier name<input formControlName="vendor_name" maxlength="120" required /></label>
+      @if (form.controls.vendor_name.touched && form.controls.vendor_name.invalid) {
+        <p role="alert">Enter a supplier name of 2 to 120 characters.</p>
+      }
+      <label
+        >Requester department<input formControlName="requester_department" maxlength="120" required
+      /></label>
+      @if (
+        form.controls.requester_department.touched && form.controls.requester_department.invalid
+      ) {
+        <p role="alert">Enter the requesting department.</p>
+      }
+    }
+    @if (step() === 2) {
+      <h2>Service & risk</h2>
+      <label
+        >Service category<select formControlName="service_category" (change)="checklist()">
+          <option value="consulting">Consulting</option>
+          <option value="software">Software</option>
+          <option value="cloud_hosting">Cloud hosting</option>
+        </select></label
+      >
+      <label
+        >Business criticality<select formControlName="business_criticality" (change)="checklist()">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select></label
+      >
+      <label
+        >Service description<textarea
+          formControlName="service_description"
+          required
+          maxlength="4000"
+        ></textarea>
+      </label>
+      @if (form.controls.service_description.touched && form.controls.service_description.invalid) {
+        <p role="alert">Describe the service in up to 4,000 characters.</p>
+      }
+      <label class="check"
+        ><input type="checkbox" formControlName="sensitive_data_access" />Access to sensitive
+        data</label
+      >
+    }
+    @if (step() === 3) {
+      <h2>Evidence declarations</h2>
+      <p>
+        Check the items supplied with this request. Missing required evidence returns the request
+        for changes on submission.
+      </p>
+      @if (required(); as checklist) {
+        <div formGroupName="evidence">
+          @for (kind of kinds; track kind) {
+            <label class="check"
+              ><input type="checkbox" [formControlName]="kind" />{{ label(kind) }}
+              <small>{{ checklist.includes(kind) ? 'Required' : 'Optional' }}</small></label
+            >
+          }
+        </div>
+      } @else if (checklistError()) {
+        <p role="alert">
+          Could not load evidence requirements.
+          <button type="button" (click)="checklist()">Retry</button>
+        </p>
+      } @else {
+        <p role="status">Loading checklist…</p>
+      }
+    }
+    <div class="actions">
+      @if (step() > 1) {
+        <button type="button" (click)="step.set(step() - 1)">Back</button>
+      }
+      <button class="primary" type="submit" [disabled]="busy() || (step() === 3 && !required())">
+        {{ step() === 3 ? (busy() ? 'Saving…' : 'Save draft') : 'Continue' }}
+      </button>
+    </div>
+  </form>
+}

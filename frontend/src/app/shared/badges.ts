@@ -11,7 +11,8 @@ export class StatusBadge {
 }
 @Component({
   selector: 'app-risk',
-  template: '<span class="pill" [attr.data-tone]="risk().band">{{ label(risk().band) }} · {{ risk().score }}</span>',
+  template:
+    '<span class="pill" [attr.data-tone]="risk().band">{{ label(risk().band) }} · {{ risk().score }}</span>',
 })
 export class RiskBadge {
   readonly risk = input.required<Schema['Risk']>();

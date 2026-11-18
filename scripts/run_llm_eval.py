@@ -10,6 +10,7 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from time import perf_counter
 from typing import Any
 
 import httpx
@@ -97,11 +98,13 @@ async def one(
         draft = await http.post("/api/requests", json=case["request"])
         draft.raise_for_status()
         path = "/api/requests/" + draft.json()["id"]
+        started = perf_counter()
         submitted = await http.post(
             path + "/submit", json={"expected_version": draft.json()["version"]}
         )
         submitted.raise_for_status()
         detail = (await http.get(path)).json()
+        submit_to_pause_ms = round((perf_counter() - started) * 1000)
         if detail["status"] != "AWAITING_APPROVAL" or detail.get("jira"):
             raise RuntimeError("Evaluation did not end at the human gate.")
         assessment = detail["assessment"]
@@ -112,6 +115,7 @@ async def one(
                 for r in conn.execute(
                     select(
                         llm_call.c.node,
+                        llm_call.c.model,
                         llm_call.c.attempt,
                         llm_call.c.outcome,
                         llm_call.c.latency_ms,
@@ -127,6 +131,7 @@ async def one(
         "adversarial": case["adversarial"],
         "status": assessment["ai_status"],
         "label": advice["recommendation"] if advice else None,
+        "submit_to_pause_ms": submit_to_pause_ms,
         "first_schema": all(observed.valid.get(n, [False])[0] for n in expected_stages),
         "final_schema": all(any(observed.valid.get(n, [])) for n in expected_stages),
         "grounded": bool(advice),
@@ -141,7 +146,7 @@ def quantile(values: list[int | float], fraction: float) -> float | None:
     return sorted(values)[math.ceil(len(values) * fraction) - 1] if values else None
 
 
-async def evaluate(output: Path) -> None:
+async def evaluate(output: Path, all_cases: bool) -> None:
     items = cases()
     cfg = Settings()
     if not cfg.llm_configured:
@@ -151,7 +156,7 @@ async def evaluate(output: Path) -> None:
         with TemporaryDirectory(prefix="vendorflow-eval-") as temp:
             folder = Path(temp)
             results = [await one(items[0], folder, provider, cfg)]
-            if results[0]["status"] != "UNAVAILABLE":
+            if all_cases or any(c["outcome"] == "OK" for c in results[0]["calls"]):
                 limit = asyncio.Semaphore(3)
 
                 async def bounded(case: dict[str, Any]) -> dict[str, Any]:
@@ -234,8 +239,13 @@ if __name__ == "__main__":
         help="Send the synthetic set to the configured provider.",
     )
     parser.add_argument("--output", type=Path, default=ROOT / "docs/evaluation.json")
+    parser.add_argument(
+        "--all-cases",
+        action="store_true",
+        help="Attempt the complete authorized set even if the first case is unavailable.",
+    )
     args = parser.parse_args()
     if args.live:
-        asyncio.run(evaluate(args.output))
+        asyncio.run(evaluate(args.output, args.all_cases))
     else:
         print(f"Validated {len(cases())} labeled cases. Live inference skipped.")

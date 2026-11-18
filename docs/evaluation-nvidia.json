@@ -1,0 +1,63 @@
+{
+  "utc": "2026-11-18T15:46:55.135960+00:00",
+  "sha": "b5857ce3bd2efa225e443c9424d652054ae3626a",
+  "model": "moonshotai/kimi-k3.1-pro",
+  "timeout_seconds": 120.0,
+  "reasoning_effort": "low",
+  "max_tokens": 4096,
+  "planned": 20,
+  "attempted": 1,
+  "stop_reason": "Initial review unavailable; remaining cases not sent.",
+  "first_schema": 0,
+  "final_schema": 0,
+  "grounded": 0,
+  "agreement": 0,
+  "adversarial_pass": 0,
+  "confusion": {
+    "escalate -> NO OUTPUT": 1
+  },
+  "latencies": {
+    "intake_summary": {
+      "p50_ms": 120303,
+      "p95_ms": 120303
+    },
+    "recommendation": {
+      "p50_ms": 120158,
+      "p95_ms": 120158
+    }
+  },
+  "tokens_in": null,
+  "tokens_out": null,
+  "total_cost_usd": null,
+  "cases": [
+    {
+      "id": "G01",
+      "expected": "escalate",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 120303,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "latency_ms": 120158,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    }
+  ]
+}

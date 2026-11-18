@@ -1,12 +1,31 @@
 <header>
-  <div class="frame masthead"><div class="brand"><span class="mark" aria-hidden="true">V</span>VendorFlow <b>AI</b></div><nav aria-label="Workspace"><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Dashboard</a><a routerLink="/queue" routerLinkActive="active">Review queue</a><a routerLink="/metrics" routerLinkActive="active">Metrics</a></nav><label class="persona">Persona <select #role [value]="workspace.persona()" (change)="workspace.switchPersona(role.value)"><option>Requester</option><option>Reviewer</option></select></label></div>
+  <div class="frame masthead">
+    <div class="brand"><span class="mark" aria-hidden="true">V</span>VendorFlow <b>AI</b></div>
+    <nav aria-label="Workspace">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+        >Dashboard</a
+      ><a routerLink="/queue" routerLinkActive="active">Review queue</a
+      ><a routerLink="/metrics" routerLinkActive="active">Metrics</a>
+    </nav>
+    <label class="persona"
+      >Persona
+      <select #role [value]="workspace.persona()" (change)="workspace.switchPersona(role.value)">
+        <option>Requester</option>
+        <option>Reviewer</option>
+      </select></label
+    >
+  </div>
 </header>
 <div class="frame">
   <section class="modes" aria-label="Environment and integrations" aria-live="polite">
     <strong>Demo mode: no authentication</strong>
     @if (modes(); as config) {
-      <span>AI <b>{{ config.llm_mode === 'configured' ? 'Configured' : 'Unavailable' }}</b></span>
-      <span>Jira <b>{{ config.jira_mode === 'live' ? 'Live' : 'Simulation' }}</b></span>
+      <span
+        >AI <b>{{ config.llm_mode === 'configured' ? 'Configured' : 'Unavailable' }}</b></span
+      >
+      <span
+        >Jira <b>{{ config.jira_mode === 'live' ? 'Live' : 'Simulation' }}</b></span
+      >
     } @else if (failed()) {
       <span>Integration status unavailable. Check the local API.</span>
       <button mat-button (click)="loadModes()">Retry</button>

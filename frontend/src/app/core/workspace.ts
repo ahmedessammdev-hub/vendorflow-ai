@@ -12,7 +12,8 @@ export function label(value: string): string {
 
 export function failure(error: unknown): string {
   if (error instanceof HttpErrorResponse) {
-    if (error.status === 409) return 'This request changed. The latest version has been loaded. Review it before trying again.';
+    if (error.status === 409)
+      return 'This request changed. The latest version has been loaded. Review it before trying again.';
     if (error.status === 422) return 'Check the values you entered and try again.';
     if (error.status === 404) return 'Request not found. Return to the dashboard.';
   }
@@ -22,7 +23,9 @@ export function failure(error: unknown): string {
 @Injectable({ providedIn: 'root' })
 export class Workspace {
   readonly http = inject(HttpClient);
-  readonly persona = signal<Persona>(sessionStorage.getItem('persona') === 'Reviewer' ? 'Reviewer' : 'Requester');
+  readonly persona = signal<Persona>(
+    sessionStorage.getItem('persona') === 'Reviewer' ? 'Reviewer' : 'Requester',
+  );
   switchPersona(value: string) {
     const persona = value === 'Reviewer' ? 'Reviewer' : 'Requester';
     this.persona.set(persona);
@@ -32,6 +35,6 @@ export class Workspace {
     return firstValueFrom(this.http.get<T>('/api/' + path, { timeout: 8000 }));
   }
   write<T>(method: 'POST' | 'PATCH', path: string, body: unknown) {
-    return firstValueFrom(this.http.request<T>(method, '/api/' + path, {body, timeout: 12000}));
+    return firstValueFrom(this.http.request<T>(method, '/api/' + path, { body, timeout: 12000 }));
   }
 }
