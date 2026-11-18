@@ -1,0 +1,4 @@
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, "Segoe UI", sans-serif; background: #f4f6f2; color: #19382f; }
+:focus-visible { outline: 3px solid #126849; outline-offset: 3px; }

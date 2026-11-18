@@ -1,0 +1,18 @@
+<header>
+  <div class="frame masthead"><div class="brand"><span class="mark" aria-hidden="true">V</span>VendorFlow <b>AI</b></div><span class="workspace">Procurement workspace</span></div>
+</header>
+<div class="frame">
+  <section class="modes" aria-label="Environment and integrations" aria-live="polite">
+    <strong>Demo mode: no authentication</strong>
+    @if (modes(); as config) {
+      <span>AI <b>{{ config.llm_mode === 'configured' ? 'Configured' : 'Unavailable' }}</b></span>
+      <span>Jira <b>{{ config.jira_mode === 'live' ? 'Live' : 'Simulation' }}</b></span>
+    } @else if (failed()) {
+      <span>Integration status unavailable. Check the local API.</span>
+      <button mat-button (click)="loadModes()">Retry</button>
+    } @else {
+      <span>Loading integration status…</span>
+    }
+  </section>
+  <main><router-outlet /></main>
+</div>
