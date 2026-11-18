@@ -37,10 +37,15 @@ class CompatibleProvider:
         if config.llm_api_key is None:
             raise ValueError("Missing LLM configuration.")
         self.model = config.llm_model
+        self.options: dict[str, str | int] = {}
+        if config.llm_reasoning_effort:
+            self.options["reasoning_effort"] = config.llm_reasoning_effort
+        if config.llm_max_tokens is not None:
+            self.options["max_tokens"] = config.llm_max_tokens
         self.client = OpenAI(
             api_key=config.llm_api_key.get_secret_value(),
             base_url=config.llm_base_url,
-            timeout=30.0,
+            timeout=config.llm_timeout_seconds,
             max_retries=0,
             _strict_response_validation=True,
         )
@@ -69,6 +74,7 @@ class CompatibleProvider:
                     {"role": "user", "content": data},
                 ],
                 response_format=response_format,
+                extra_body=self.options,
             )
         except BadRequestError as exc:
             if not json_mode and any(

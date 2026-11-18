@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     llm_api_key: SecretStr | None = None
     llm_base_url: str = ""
     llm_model: str = ""
+    llm_timeout_seconds: float = Field(default=30, gt=0, le=300)
+    llm_reasoning_effort: Literal["", "low", "medium", "high"] = ""
+    llm_max_tokens: int | None = Field(default=None, ge=128, le=16384)
+    llm_input_usd_per_million: float | None = Field(default=None, ge=0)
+    llm_output_usd_per_million: float | None = Field(default=None, ge=0)
     jira_mode: Literal["simulation", "live"] = "simulation"
 
     jira_base_url: str = ""
