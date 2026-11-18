@@ -51,6 +51,35 @@ async def client(app: FastAPI) -> AsyncIterator[httpx.AsyncClient]:
             yield http
 
 
+def test_vf11_metrics_and_checklist_reflect_workspace(
+    app: FastAPI, run_async: Run
+) -> None:
+    async def journey() -> None:
+        async with client(app) as http:
+            assert (await http.get("/api/metrics")).json() == {
+                "requests": {},
+                "jira": {},
+                "calls": 0,
+                "tokens_in": None,
+                "tokens_out": None,
+                "latency_p50_ms": None,
+                "latency_p95_ms": None,
+            }
+            created = await http.post(BASE, json=CEDAR)
+            assert created.status_code == 201
+            requirements = await http.get(
+                "/api/settings/evidence",
+                params={
+                    "category": CEDAR["service_category"],
+                    "criticality": CEDAR["business_criticality"],
+                },
+            )
+            assert requirements.json() == created.json()["required_evidence"]
+            assert (await http.get("/api/metrics")).json()["requests"] == {"DRAFT": 1}
+
+    run_async(journey())
+
+
 def test_vf01_draft_persists_across_new_engine_and_html_is_text(
     app: FastAPI, run_async: Run
 ) -> None:

@@ -17,6 +17,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Metrics */
+        get: operations["metrics_api_metrics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Evidence Requirements */
+        get: operations["evidence_requirements_api_settings_evidence_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/settings/integrations": {
         parameters: {
             query?: never;
@@ -518,6 +552,27 @@ export interface components {
             /** Expected Version */
             expected_version: number;
         };
+        /** WorkspaceMetrics */
+        WorkspaceMetrics: {
+            /** Requests */
+            requests: {
+                [key: string]: number;
+            };
+            /** Jira */
+            jira: {
+                [key: string]: number;
+            };
+            /** Calls */
+            calls: number;
+            /** Latency P50 Ms */
+            latency_p50_ms: number | null;
+            /** Latency P95 Ms */
+            latency_p95_ms: number | null;
+            /** Tokens In */
+            tokens_in: number | null;
+            /** Tokens Out */
+            tokens_out: number | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -543,6 +598,58 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    metrics_api_metrics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceMetrics"];
+                };
+            };
+        };
+    };
+    evidence_requirements_api_settings_evidence_get: {
+        parameters: {
+            query: {
+                category: components["schemas"]["Category"];
+                criticality: components["schemas"]["Criticality"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidenceKind"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

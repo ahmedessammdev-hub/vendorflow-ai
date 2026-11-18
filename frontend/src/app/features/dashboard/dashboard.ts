@@ -1,19 +1,28 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Workspace, Schema, label, failure } from '../../core/workspace';
+import { StatusBadge, RiskBadge } from '../../shared/badges';
 
 @Component({
-  selector: 'app-dashboard',
-  template: `
-    <h1>Dashboard</h1>
-    <section aria-labelledby="requests-heading">
-      <h2 id="requests-heading">Supplier requests</h2>
-      <p>Request intake will be available in a later phase.</p>
-    </section>
-  `,
-  styles: `
-    h1 { margin: clamp(2.5rem, 6vw, 5rem) 0 1.5rem; font-size: clamp(2.3rem, 6vw, 4rem); font-weight: 550; letter-spacing: -.055em; }
-    section { padding: clamp(1.4rem, 4vw, 2.8rem); background: #fff; border: 1px solid #d7dfd8; border-radius: .8rem; }
-    h2 { margin: 0 0 .65rem; font-size: 1.35rem; }
-    p { margin: 0; color: #536458; line-height: 1.6; }
-  `,
+  selector: 'app-dashboard', imports: [RouterLink, DatePipe, StatusBadge, RiskBadge],
+  templateUrl: './dashboard.html',
 })
-export class Dashboard {}
+export class Dashboard {
+  readonly workspace = inject(Workspace);
+  readonly queue = Boolean(inject(ActivatedRoute).snapshot.data['queue']);
+  readonly data = signal<Schema['RequestList'] | null>(null);
+  readonly error = signal('');
+  readonly filter = signal('');
+  readonly label = label;
+  readonly keys = Object.keys;
+  constructor() { void this.load(); }
+  async load() {
+    this.error.set('');
+    try {
+      this.data.set(await this.workspace.get<Schema['RequestList']>('requests' + (this.queue ? '?status=AWAITING_APPROVAL' : '')));
+    } catch (err) { this.error.set(failure(err)); }
+  }
+  count(status: string) { return this.data()?.counts[status] ?? 0; }
+  total() { return Object.values(this.data()?.counts ?? {}).reduce((a,b) => a + (b ?? 0),0); }
+}

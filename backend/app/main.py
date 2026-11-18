@@ -10,7 +10,7 @@ from starlette.concurrency import run_in_threadpool
 from app.agents.graph import build_graph
 from app.agents.llm_adapter import CompatibleProvider, Provider
 from app.agents.nodes import ReviewNodes
-from app.api import audit, health, jira, requests, review, settings
+from app.api import audit, health, jira, metrics, requests, review, settings
 from app.core.config import Settings
 from app.core.limits import BodyLimit
 from app.integration.dispatcher import Dispatcher
@@ -91,6 +91,7 @@ def create_app(
 
     for router in (
         health.router,
+        metrics.router,
         settings.router,
         requests.router,
         audit.router,

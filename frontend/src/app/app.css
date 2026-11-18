@@ -6,6 +6,7 @@ header { background: #183b33; color: #fff; }
 .brand { gap: .45rem; font-size: 1.4rem; font-weight: 650; letter-spacing: -.04em; }
 .brand b { color: #b5d9a8; }
 .mark { display: grid; place-items: center; margin-right: .3rem; background: #cbe9bd; width: 2rem; height: 2rem; border-radius: .45rem; color: #183b33; font-weight: 800; }
+nav {display:flex;gap:1.3rem;align-items:center} nav a {color:#e5f0e8;text-decoration:none;padding:.3rem 0} nav .active {border-bottom:2px solid #bada9d;color:white} .persona {display:flex;gap:.5rem;align-items:center;font-size:.86rem}.persona select {font-size:.85rem} @media(max-width:700px){.masthead{flex-wrap:wrap;padding:.8rem 0}.masthead nav{order:3;flex-basis:100%}}
 .workspace { color: #d9e7de; font-size: .86rem; }
 .modes { flex-wrap: wrap; gap: .6rem 1.4rem; padding: 1.15rem 0; color: #46544e; border-bottom: 1px solid #cdd7cf; font-size: .85rem; }
 .modes strong { color: #654a1a; background: #f8edce; padding: .4rem .65rem; border-radius: .35rem; }

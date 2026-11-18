@@ -4,8 +4,17 @@ from fastapi import APIRouter, Request
 from pydantic import BaseModel
 
 from app.core.config import Settings
+from app.domain.enums import Category, Criticality, EvidenceKind
+from app.domain.rules import checklist_for
 
 router = APIRouter()
+
+
+@router.get("/settings/evidence")
+def evidence_requirements(
+    category: Category, criticality: Criticality
+) -> list[EvidenceKind]:
+    return checklist_for(category, criticality)
 
 
 class IntegrationModes(BaseModel):

@@ -3,10 +3,14 @@ from app.domain.models import Factor, Risk, VendorData
 
 
 def required_evidence(data: VendorData) -> list[EvidenceKind]:
+    return checklist_for(data.service_category, data.business_criticality)
+
+
+def checklist_for(category: Category, criticality: Criticality) -> list[EvidenceKind]:
     required = [EvidenceKind.REGISTRATION]
-    if data.service_category in {Category.CLOUD, Category.SOFTWARE}:
+    if category in {Category.CLOUD, Category.SOFTWARE}:
         required.append(EvidenceKind.QUESTIONNAIRE)
-    if data.business_criticality == Criticality.HIGH:
+    if criticality == Criticality.HIGH:
         required.append(EvidenceKind.SLA)
     return required
 

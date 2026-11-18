@@ -219,3 +219,9 @@ if (!$schema.paths.PSObject.Properties.Match('*reconcile').Count -or $r.status -
 ```
 
 </details>
+
+## 2026-11-18 • Phase 4 interface and browser verification
+
+Added the supplier dashboard, request form, review queue, request details, Jira reconciliation and workspace metrics. Evidence requirements use the same backend function on the form and on submission. Polling ends after a minute, stale versions reload from the API, and the reviewer must explicitly record a reason. The E2E configuration uses isolated SQLite files, disables the model and selects Jira simulation.
+
+On the milestone tree committed as `phase-4: frontend and e2e`, backend commands `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy app`, `uv run pytest -q --tb=short` and the additional `uv run pytest -q -k metrics_and_checklist` exited 0. The full run passed 170 existing tests, followed by the new metrics regression. Frontend commands `npm run gen:api`, `npm run lint`, `npm test -- --watch=false`, `npm run build`, `npx playwright test` each exited 0. Five UI unit tests and both Edge journeys passed. The five axe scans found zero serious or critical violations. Captures are in `docs/screenshots/`. A dashboard index-signature template error and a SQLAlchemy deprecation warning were fixed during verification.

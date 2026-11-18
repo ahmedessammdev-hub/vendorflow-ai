@@ -1,0 +1,12 @@
+<div class="pagehead"><div><p class="eyebrow">Procurement operations</p><h1>{{ queue ? 'Review queue' : 'Supplier workspace' }}</h1></div>
+@if (!queue && workspace.persona() === 'Requester') {<a class="primary" routerLink="/requests/new">New request <span aria-hidden="true">＋</span></a>}</div>
+@if (error()) {<p class="notice" role="alert">{{ error() }} <button (click)="load()">Retry</button></p>}
+@if (data(); as result) {
+@if (!queue) {<div class="stats"><article><span>All requests</span><strong>{{ total() }}</strong></article><article><span>Awaiting approval</span><strong>{{ count('AWAITING_APPROVAL') }}</strong></article><article><span>Needs changes</span><strong>{{ count('NEEDS_CHANGES') }}</strong></article><article><span>Tickets created</span><strong>{{ count('JIRA_CREATED') }}</strong></article></div>}
+<section class="panel"><div class="sectionhead"><h2>{{ queue ? 'Awaiting human approval' : 'Supplier requests' }}</h2>
+@if (!queue) {<label>Status <select #pick (change)="filter.set(pick.value)"><option value="">All statuses</option>@for (s of keys(result.counts); track s) {<option [value]="s">{{ label(s) }}</option>}</select></label>}</div>
+<div class="scroll"><table><thead><tr><th>Supplier</th><th>Risk</th><th>Status</th><th>Updated</th></tr></thead><tbody>
+@for (row of result.items; track row.id) { @if (!filter() || filter() === row.status) {<tr><td><a [routerLink]="['/requests',row.id]">{{ row.vendor_name }}</a><small>{{ label(row.service_category) }} · {{ row.requester_department }}</small></td><td><app-risk [risk]="row.risk"/></td><td><app-status [status]="row.status"/></td><td>{{ row.updated_at | date:'mediumDate' }}</td></tr>} }
+</tbody></table></div>
+@if (!result.items.length || (filter() && !count(filter()))) {<p class="empty">{{ queue ? 'No requests are waiting for a decision.' : 'No supplier requests match this view.' }}</p>}</section>
+} @else if (!error()) {<div class="skeleton" role="status">Loading requests…</div>}
