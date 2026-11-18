@@ -2,6 +2,8 @@
 
 A local procurement review workspace built with Angular, FastAPI and LangGraph. A requester declares supplier evidence. Deterministic rules identify missing documents and calculate an illustrative risk score. Two bounded model stages draft a summary and recommendation with citations. A reviewer records the decision. Approval queues a Jira operation that the dispatcher can reconcile after a lost response.
 
+[Watch the two-minute walkthrough (MP4)](docs/demo/vendorflow-demo.mp4) · [Model evaluation and case review](docs/model-review.md)
+
 ![Supplier workspace](docs/screenshots/dashboard.png)
 
 ## Run from a clean checkout on Windows

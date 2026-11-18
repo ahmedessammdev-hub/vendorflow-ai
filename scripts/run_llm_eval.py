@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+import hashlib
 import json
 import math
 import subprocess
@@ -20,6 +21,7 @@ from sqlalchemy import select
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 from app.agents.llm_adapter import CompatibleProvider, Reply  # noqa: E402
+from app.agents.prompts import PROMPT_VERSION  # noqa: E402
 from app.agents.schemas import Recommendation  # noqa: E402
 from app.core.config import Settings  # noqa: E402
 from app.domain.models import CreateRequest  # noqa: E402
@@ -118,6 +120,7 @@ async def one(
                         llm_call.c.model,
                         llm_call.c.attempt,
                         llm_call.c.outcome,
+                        llm_call.c.failure_reason,
                         llm_call.c.latency_ms,
                         llm_call.c.tokens_in,
                         llm_call.c.tokens_out,
@@ -138,6 +141,10 @@ async def one(
         "human_gate": True,
         "calls": records,
     }
+    result["review_sample"] = {
+        "summary": assessment.get("summary"),
+        "recommendation": advice,
+    }
     print(case["id"], result["status"], flush=True)
     return result
 
@@ -146,7 +153,7 @@ def quantile(values: list[int | float], fraction: float) -> float | None:
     return sorted(values)[math.ceil(len(values) * fraction) - 1] if values else None
 
 
-async def evaluate(output: Path, all_cases: bool) -> None:
+async def evaluate(output: Path, all_cases: bool, samples: Path | None = None) -> None:
     items = cases()
     revision = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
@@ -169,6 +176,10 @@ async def evaluate(output: Path, all_cases: bool) -> None:
                 results.extend(await asyncio.gather(*(bounded(c) for c in items[1:])))
     finally:
         provider.client.close()
+    examples = {row["id"]: row.pop("review_sample") for row in results}
+    if samples is not None:
+        samples.parent.mkdir(parents=True, exist_ok=True)
+        samples.write_text(json.dumps(examples, indent=2) + "\n", encoding="utf-8")
     calls = [call for row in results for call in row["calls"]]
     labels = [r for r in results if r["label"]]
     known_tokens = bool(calls) and all(
@@ -201,9 +212,16 @@ async def evaluate(output: Path, all_cases: bool) -> None:
         "utc": datetime.now(UTC).isoformat(),
         "sha": revision,
         "model": cfg.llm_model,
+        "prompt_version": PROMPT_VERSION,
+        "failure_reasons": dict(
+            Counter(c["failure_reason"] for c in calls if c["failure_reason"])
+        ),
         "timeout_seconds": cfg.llm_timeout_seconds,
         "reasoning_effort": cfg.llm_reasoning_effort,
         "max_tokens": cfg.llm_max_tokens,
+        "dataset_sha256": hashlib.sha256(
+            json.dumps(items, sort_keys=True).encode()
+        ).hexdigest(),
         "planned": len(items),
         "attempted": len(results),
         "stop_reason": "Initial review unavailable; remaining cases not sent."
@@ -245,8 +263,13 @@ if __name__ == "__main__":
         action="store_true",
         help="Attempt the complete authorized set even if the first case is unavailable.",
     )
+    parser.add_argument(
+        "--review-samples",
+        type=Path,
+        help="Optional local file of validated synthetic outputs for manual review.",
+    )
     args = parser.parse_args()
     if args.live:
-        asyncio.run(evaluate(args.output, args.all_cases))
+        asyncio.run(evaluate(args.output, args.all_cases, args.review_samples))
     else:
         print(f"Validated {len(cases())} labeled cases. Live inference skipped.")

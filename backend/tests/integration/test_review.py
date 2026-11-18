@@ -64,6 +64,8 @@ class FakeProvider:
         assert (
             "ignore previous instructions" not in system and "untrusted data" in system
         )
+        if self.scenario == "summary_down" and schema is IntakeSummary:
+            raise ProviderDown("http_502")
         if self.scenario == "down":
             raise ProviderDown
         if self.scenario == "fallback" and not json_mode:
@@ -119,6 +121,7 @@ async def submit(http: httpx.AsyncClient) -> tuple[str, dict[str, Any]]:
         ("unknown", "INVALID_OUTPUT", 3),
         ("wrong_value", "INVALID_OUTPUT", 3),
         ("down", "UNAVAILABLE", 2),
+        ("summary_down", "UNAVAILABLE", 2),
         ("fallback", "OK", 4),
     ],
 )
@@ -142,8 +145,22 @@ def test_vf04_bounded_and_grounded_vf05_paused(
                     analysis["summary"] == SUMMARY
                     and analysis["recommendation"] == ADVICE
                 )
+            elif scenario == "summary_down":
+                assert analysis["summary"] is None
+                assert analysis["recommendation"] == ADVICE
+                assert analysis["summary_stage"] == dict(
+                    status="UNAVAILABLE", model=fake.model, failure_reason="http_502"
+                )
+                assert analysis["recommendation_stage"] == dict(
+                    status="OK", model=fake.model, failure_reason=None
+                )
             else:
                 assert analysis["recommendation"] is None
+                if scenario in {"wrong_value", "unknown"}:
+                    assert (
+                        analysis["recommendation_stage"]["failure_reason"]
+                        == "citation_mismatch"
+                    )
             graph = app.state.workflow.graph
             state = graph.get_state({"configurable": {"thread_id": key}})
             assert state.interrupts and state.next == ("human_review",)

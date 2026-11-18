@@ -15,6 +15,14 @@ from app.persistence.database import write_transaction
 from app.persistence.tables import assessment, llm_call
 
 
+class CitationMismatch(ValueError):
+    pass
+
+
+class BlockedOutput(ValueError):
+    pass
+
+
 class Stage(TypedDict):
     outcome: str
     output: dict[str, Any] | None
@@ -38,11 +46,11 @@ def check_citations(advice: Recommendation, facts: dict[str, Any]) -> None:
         or set(fields) != {c.field for c in advice.citations}
         or len(fields) != len(advice.citations)
     ):
-        raise ValueError("Citations must match cited fields.")
+        raise CitationMismatch("Citations must match cited fields.")
     for citation in advice.citations:
         original = facts.get(citation.field)
         if type(original) is not type(citation.value) or original != citation.value:
-            raise ValueError("Citation does not match a request fact.")
+            raise CitationMismatch("Citation does not match a request fact.")
 
 
 class ReviewNodes:
@@ -99,7 +107,7 @@ class ReviewNodes:
                     conn.execute(
                         update(llm_call)
                         .where(llm_call.c.id == row["id"])
-                        .values(outcome="UNAVAILABLE")
+                        .values(outcome="UNAVAILABLE", failure_reason="interrupted")
                     )
                     return {"outcome": "UNAVAILABLE", "output": None}
                 return {"outcome": row["outcome"], "output": row["validated_output"]}
@@ -119,6 +127,7 @@ class ReviewNodes:
         model = provider.model
         parsed = None
         status = "OK"
+        failure_reason = None
         try:
             system, user = messages(schema, payload, repair)
             reply = provider.complete(schema, system, user, json_mode)
@@ -127,15 +136,33 @@ class ReviewNodes:
             tokens_in, tokens_out = reply.tokens_in, reply.tokens_out
             value = schema.model_validate_json(reply.content, strict=True)
             if self.secret and self.secret in value.model_dump_json():
-                raise ValueError("Disallowed output.")
+                raise BlockedOutput
             if isinstance(value, Recommendation):
                 check_citations(value, state["facts"])
             parsed = value.model_dump(mode="json")
         except SchemaUnsupported:
+            failure_reason = "schema_format_unsupported"
             status = "FORMAT_UNSUPPORTED"
-        except ProviderDown:
+        except ProviderDown as exc:
+            failure_reason = exc.category
             status = "UNAVAILABLE"
-        except (ValidationError, ValueError):
+        except ValidationError as exc:
+            failure_reason = (
+                "invalid_json"
+                if any(
+                    e["type"] == "json_invalid" for e in exc.errors(include_input=False)
+                )
+                else "schema_validation"
+            )
+            status = "INVALID_OUTPUT"
+        except CitationMismatch:
+            failure_reason = "citation_mismatch"
+            status = "INVALID_OUTPUT"
+        except BlockedOutput:
+            failure_reason = "blocked_output"
+            status = "INVALID_OUTPUT"
+        except ValueError:
+            failure_reason = "output_validation"
             status = "INVALID_OUTPUT"
         with write_transaction(self.engine) as conn:
             conn.execute(
@@ -143,6 +170,7 @@ class ReviewNodes:
                 .filter_by(**ident)
                 .values(
                     outcome=status,
+                    failure_reason=failure_reason,
                     validated_output=parsed,
                     model=model,
                     latency_ms=round((perf_counter() - started) * 1000),

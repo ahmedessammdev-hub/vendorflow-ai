@@ -163,5 +163,6 @@ llm_call = Table(
     Column("tokens_in", Integer),
     Column("tokens_out", Integer),
     Column("outcome", String(32), nullable=False),
+    Column("failure_reason", String(48)),
     Column("created_at", String(40), nullable=False, default=timestamp),
 )

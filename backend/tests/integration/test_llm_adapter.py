@@ -92,6 +92,44 @@ def test_vf04_sdk_contract_and_fallback(
             4,
             2,
         )
-        with pytest.raises(ProviderDown):
+        with pytest.raises(ProviderDown, match="^http_503$"):
             adapter.complete(IntakeSummary, "system", "data", True)
     assert len(messages) == 3
+
+
+@pytest.mark.parametrize(
+    ("failure", "category"),
+    [
+        ("timeout", "timeout"),
+        ("connection", "connection_error"),
+        ("limited", "http_429"),
+    ],
+)
+def test_transport_diagnostics_exclude_response_and_exception_text(
+    failure: str, category: str
+) -> None:
+    adapter = CompatibleProvider(
+        Settings(
+            _env_file=None,
+            llm_api_key=SecretStr("fixture-only"),
+            llm_model="offline",
+            llm_base_url="https://fixture.invalid/v1",
+        )
+    )
+
+    def respond(request: httpx2.Request) -> httpx2.Response:
+        if failure == "timeout":
+            raise httpx2.ReadTimeout("private detail", request=request)
+        if failure == "connection":
+            raise httpx2.ConnectError("private detail", request=request)
+        return httpx2.Response(429, json={"error": {"message": "private detail"}})
+
+    with (
+        adapter.client as sdk,
+        DefaultHttpxClient(transport=httpx2.MockTransport(respond)) as offline,
+    ):
+        adapter.client = sdk.with_options(http_client=offline)
+        with pytest.raises(ProviderDown) as caught:
+            adapter.complete(IntakeSummary, "system", "data", True)
+    assert caught.value.category == str(caught.value) == category
+    assert ProviderDown("private detail").category == "provider_error"

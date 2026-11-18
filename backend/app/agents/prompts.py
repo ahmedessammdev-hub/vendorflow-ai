@@ -3,7 +3,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-PROMPT_VERSION = "review-v1"
+PROMPT_VERSION = "review-v2"
 
 
 def messages(
@@ -16,6 +16,11 @@ def messages(
         "For recommendations cite scalar request fields by exact name and original typed value. "
         "Each cited_input_fields entry must have one matching citation. "
         "Use the deterministic risk as supplied. "
+        "For the recommendation, request_more_info when a material fact needed to assess the service "
+        "is explicitly unknown. Escalate to specialist review when the supplied facts establish "
+        "critical operational exposure or a consequential control gap. Use approve_review for a "
+        "well-scoped, low-impact service with appropriate declarations and no material open question. "
+        "Explain the decisive fact and distinguish declared evidence from verified controls. "
     )
     if repair:
         system += "The previous output failed validation. Produce a fresh, schema-valid, grounded object. "

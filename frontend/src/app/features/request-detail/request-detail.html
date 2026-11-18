@@ -27,7 +27,8 @@
   @if (r.status === 'UNDER_REVIEW' || r.status === 'JIRA_PENDING') {
     <p class="notice" role="status">
       @if (timedOut()) {
-        Updates paused after 60 seconds. <button (click)="refresh()">Check again</button>
+        The review can continue in the background. Automatic updates paused after 60 seconds.
+        <button (click)="refresh()">Check again</button>
       } @else {
         Working on this request. Updates appear automatically.
       }
@@ -80,9 +81,15 @@
       <section class="panel">
         <h2>AI assessment</h2>
         @if (r.assessment; as a) {
+          <h3>Intake summary</h3>
           <p>
-            <b>{{ a.ai_status === 'OK' ? 'Available' : label(a.ai_status) }}</b> ·
-            {{ a.model || 'Model unavailable' }}
+            {{ a.summary_stage.status === 'OK' ? 'Available' : label(a.summary_stage.status) }}
+            @if (a.summary_stage.model; as model) {
+              · {{ model }}
+            }
+            @if (a.summary_stage.failure_reason; as reason) {
+              · {{ label(reason) }}
+            }
           </p>
           @if (a.summary; as s) {
             <h3>{{ s.what_is_requested }}</h3>
@@ -92,6 +99,20 @@
               <p>{{ m }}</p>
             }
           }
+          <h3>Recommendation</h3>
+          <p>
+            {{
+              a.recommendation_stage.status === 'OK'
+                ? 'Available'
+                : label(a.recommendation_stage.status)
+            }}
+            @if (a.recommendation_stage.model; as model) {
+              · {{ model }}
+            }
+            @if (a.recommendation_stage.failure_reason; as reason) {
+              · {{ label(reason) }}
+            }
+          </p>
           @if (a.recommendation; as rec) {
             <h3>{{ label(rec.recommendation) }}</h3>
             <p>{{ rec.justification }}</p>

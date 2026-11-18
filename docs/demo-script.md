@@ -1,5 +1,7 @@
 # Three-minute interview walkthrough
 
+[Watch the two-minute captioned walkthrough](demo/vendorflow-demo.mp4). The recording uses the local application with synthetic drafts, a disconnected model and Jira simulation. The live model results are documented in [the case review](model-review.md).
+
 Use synthetic supplier data. Open the local dashboard with Jira in Simulation. The top bar shows the current AI configuration and the demo persona.
 
 | Time | Show | Explain |

@@ -178,6 +178,8 @@ export interface components {
     schemas: {
         /** AssessmentView */
         AssessmentView: {
+            summary_stage: components["schemas"]["StageView"];
+            recommendation_stage: components["schemas"]["StageView"];
             /** Request Version */
             request_version: number;
             /**
@@ -529,6 +531,18 @@ export interface components {
          * @enum {string}
          */
         RiskBand: "LOW" | "MEDIUM" | "HIGH";
+        /** StageView */
+        StageView: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "OK" | "UNAVAILABLE" | "INVALID_OUTPUT";
+            /** Model */
+            model: string | null;
+            /** Failure Reason */
+            failure_reason: string | null;
+        };
         /**
          * Status
          * @enum {string}

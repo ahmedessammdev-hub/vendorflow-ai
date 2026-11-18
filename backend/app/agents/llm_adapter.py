@@ -1,7 +1,16 @@
+import re
 from dataclasses import dataclass
 from typing import Protocol
 
-from openai import APIError, APIResponseValidationError, BadRequestError, OpenAI
+from openai import (
+    APIConnectionError,
+    APIError,
+    APIResponseValidationError,
+    APIStatusError,
+    APITimeoutError,
+    BadRequestError,
+    OpenAI,
+)
 from openai.types.chat.completion_create_params import ResponseFormat
 from pydantic import BaseModel
 
@@ -17,7 +26,14 @@ class Reply:
 
 
 class ProviderDown(Exception):
-    pass
+    def __init__(self, category: str = "provider_error") -> None:
+        self.category = (
+            category
+            if category in {"connection_error", "timeout"}
+            or re.fullmatch(r"http_[1-5][0-9]{2}", category)
+            else "provider_error"
+        )
+        super().__init__(self.category)
 
 
 class SchemaUnsupported(Exception):
@@ -82,7 +98,13 @@ class CompatibleProvider:
                 for word in ("response_format", "json_schema", "json schema")
             ):
                 raise SchemaUnsupported from None
-            raise ProviderDown from None
+            raise ProviderDown("http_400") from None
+        except APITimeoutError:
+            raise ProviderDown("timeout") from None
+        except APIConnectionError:
+            raise ProviderDown("connection_error") from None
+        except APIStatusError as exc:
+            raise ProviderDown(f"http_{exc.status_code:d}") from None
         except APIResponseValidationError:
             return Reply("", None, None)
         except APIError:

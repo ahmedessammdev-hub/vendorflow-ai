@@ -7,7 +7,7 @@ from app.domain.enums import Status
 from app.domain.models import RequestView
 from app.persistence import repositories as repo
 from app.persistence.database import write_transaction
-from app.persistence.tables import assessment, jira_operation, review_decision
+from app.persistence.tables import assessment, jira_operation, llm_call, review_decision
 
 
 def detail(engine: Engine, key: UUID) -> RequestDetail:
@@ -47,9 +47,34 @@ def detail(engine: Engine, key: UUID) -> RequestDetail:
             .one_or_none()
         )
         if row and row["ai_status"]:
-            result.assessment = AssessmentView.model_validate(
-                {k: row[k] for k in AssessmentView.model_fields}
-            )
+            calls = conn.execute(
+                select(
+                    llm_call.c.node,
+                    llm_call.c.model,
+                    llm_call.c.outcome,
+                    llm_call.c.failure_reason,
+                )
+                .filter_by(request_id=str(key), request_version=row["request_version"])
+                .order_by(llm_call.c.attempt)
+            ).mappings()
+            latest = {call["node"]: call for call in calls}
+            assessment_data = {
+                k: row[k] for k in AssessmentView.model_fields if k in row
+            }
+            for field, node in (
+                ("summary", "intake_summary"),
+                ("recommendation", "recommendation"),
+            ):
+                call = latest.get(node)
+                status = "OK" if row[field] is not None else "UNAVAILABLE"
+                if call and call["outcome"] in {"INVALID_OUTPUT", "FORMAT_UNSUPPORTED"}:
+                    status = "INVALID_OUTPUT"
+                assessment_data[field + "_stage"] = {
+                    "status": status,
+                    "model": call["model"] if call else None,
+                    "failure_reason": call["failure_reason"] if call else None,
+                }
+            result.assessment = AssessmentView.model_validate(assessment_data)
         return result
 
 

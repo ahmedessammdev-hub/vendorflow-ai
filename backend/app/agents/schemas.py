@@ -32,7 +32,15 @@ class Recommendation(Model):
     caution: Text
 
 
+class StageView(Model):
+    status: AIStatus
+    model: str | None
+    failure_reason: str | None
+
+
 class AssessmentView(Model):
+    summary_stage: StageView
+    recommendation_stage: StageView
     request_version: int
     ai_status: AIStatus
     model: str | None
