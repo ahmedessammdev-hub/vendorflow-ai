@@ -2,7 +2,7 @@
 
 ## 2026-11-18 · Phase 0 · Bootstrap
 
-Local Windows verification for `phase-0: bootstrap`. Original specifications at `a477018d7322c27a541924c7a0a35c8e7cd30208`.
+Verified implementation commit `445c918e76f4ca2c6eaa97f3d9deaf8250275549` (`phase-0: bootstrap`). All gate and dependency measurements below refer to this implementation. Lint, types, tests, coverage, schema generation and the production build were also rerun directly at that commit. Original specifications at `a477018d7322c27a541924c7a0a35c8e7cd30208`.
 
 FastAPI exposes health and public integration settings. The dashboard reads those settings over the loopback proxy and handles loading, errors and retry. The production build validates generated OpenAPI types. The milestone includes Windows CI, four ADRs, the setup guide and a real browser capture. Later-phase directories exist locally and Git will track their contents as the phases are implemented.
 
