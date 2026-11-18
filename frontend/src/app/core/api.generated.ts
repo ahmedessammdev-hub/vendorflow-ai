@@ -104,10 +104,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/requests/{request_id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Decision */
+        post: operations["record_decision_api_requests__request_id__decision_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AssessmentView */
+        AssessmentView: {
+            /** Request Version */
+            request_version: number;
+            /**
+             * Ai Status
+             * @enum {string}
+             */
+            ai_status: "OK" | "UNAVAILABLE" | "INVALID_OUTPUT";
+            /** Model */
+            model: string | null;
+            /** Prompt Version */
+            prompt_version: string;
+            summary: components["schemas"]["IntakeSummary"] | null;
+            recommendation: components["schemas"]["Recommendation"] | null;
+        };
         /** AuditView */
         AuditView: {
             /** Id */
@@ -138,6 +171,13 @@ export interface components {
          * @enum {string}
          */
         Category: "cloud_hosting" | "software" | "consulting";
+        /** Citation */
+        Citation: {
+            /** Field */
+            field: string;
+            /** Value */
+            value: string | boolean;
+        };
         /** ConflictView */
         ConflictView: {
             /** Detail */
@@ -241,6 +281,31 @@ export interface components {
              */
             status: "ok";
         };
+        /** HumanDecision */
+        HumanDecision: {
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "approve" | "reject" | "request_changes";
+            /** Reviewer Label */
+            reviewer_label: string;
+            /** Reason */
+            reason: string;
+        };
+        /** IntakeSummary */
+        IntakeSummary: {
+            /** What Is Requested */
+            what_is_requested: string;
+            /** Service Description */
+            service_description: string;
+            /** Evidence Summary */
+            evidence_summary: string;
+            /** Missing Information */
+            missing_information: string[];
+        };
         /** IntegrationModes */
         IntegrationModes: {
             /**
@@ -259,6 +324,61 @@ export interface components {
              * @enum {string}
              */
             jira_mode: "simulation" | "live";
+        };
+        /** Recommendation */
+        Recommendation: {
+            /**
+             * Recommendation
+             * @enum {string}
+             */
+            recommendation: "approve_review" | "request_more_info" | "escalate";
+            /** Justification */
+            justification: string;
+            /** Cited Input Fields */
+            cited_input_fields: string[];
+            /** Citations */
+            citations: components["schemas"]["Citation"][];
+            /** Caution */
+            caution: string;
+        };
+        /** RequestDetail */
+        RequestDetail: {
+            /** Vendor Name */
+            vendor_name: string;
+            service_category: components["schemas"]["Category"];
+            business_criticality: components["schemas"]["Criticality"];
+            /** Sensitive Data Access */
+            sensitive_data_access: boolean;
+            /** Requester Department */
+            requester_department: string;
+            /** Service Description */
+            service_description: string;
+            /** Evidence */
+            evidence?: components["schemas"]["Evidence"][];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            status: components["schemas"]["Status"];
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Required Evidence */
+            required_evidence: components["schemas"]["EvidenceKind"][];
+            /** Missing Evidence */
+            missing_evidence: components["schemas"]["EvidenceKind"][];
+            risk: components["schemas"]["Risk"];
+            assessment?: components["schemas"]["AssessmentView"] | null;
         };
         /** RequestList */
         RequestList: {
@@ -473,7 +593,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RequestView"];
+                    "application/json": components["schemas"]["RequestDetail"];
                 };
             };
             /** @description Validation Error */
@@ -602,6 +722,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuditView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_decision_api_requests__request_id__decision_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HumanDecision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestView"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConflictView"];
                 };
             };
             /** @description Validation Error */

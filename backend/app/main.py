@@ -1,19 +1,27 @@
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import ExitStack, asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 
-from app.api import audit, health, requests, settings
+from app.agents.graph import build_graph
+from app.agents.llm_adapter import CompatibleProvider, Provider
+from app.agents.nodes import ReviewNodes
+from app.api import audit, health, requests, review, settings
 from app.core.config import Settings
 from app.core.limits import BodyLimit
+from app.persistence.checkpointer import open_checkpointer
 from app.persistence.database import make_engine, migrate
 from app.persistence.repositories import Conflict, MissingRequest
+from app.services.recovery import ReviewWorkflow
 
 
-def create_app(config: Settings | None = None) -> FastAPI:
+def create_app(
+    config: Settings | None = None, *, provider: Provider | None = None
+) -> FastAPI:
     config = config if config is not None else Settings()
     engine = make_engine(config.database_path)
 
@@ -21,7 +29,25 @@ def create_app(config: Settings | None = None) -> FastAPI:
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
         try:
             migrate(engine)
-            yield
+            with ExitStack() as stack:
+                active_provider = provider
+                if active_provider is None and config.llm_configured:
+                    live = CompatibleProvider(config)
+                    stack.callback(live.client.close)
+                    active_provider = live
+                saver = stack.enter_context(open_checkpointer(config.checkpoint_path))
+                nodes = ReviewNodes(
+                    engine,
+                    active_provider,
+                    config.llm_api_key.get_secret_value()
+                    if config.llm_api_key
+                    else None,
+                )
+                application.state.workflow = ReviewWorkflow(
+                    engine, build_graph(nodes, saver)
+                )
+                await run_in_threadpool(application.state.workflow.recover)
+                yield
         finally:
             engine.dispose()
 
@@ -52,7 +78,13 @@ def create_app(config: Settings | None = None) -> FastAPI:
         errors = [{k: e[k] for k in ("loc", "type", "msg")} for e in exc.errors()]
         return JSONResponse({"detail": errors}, status_code=422)
 
-    for router in (health.router, settings.router, requests.router, audit.router):
+    for router in (
+        health.router,
+        settings.router,
+        requests.router,
+        audit.router,
+        review.router,
+    ):
         application.include_router(router, prefix="/api")
     return application
 

@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     jira_mode: Literal["simulation", "live"] = "simulation"
 
     @property
+    def checkpoint_path(self) -> Path:
+        if self.database_path.name == "vendorflow.sqlite":
+            return self.database_path.with_name("checkpoints.sqlite")
+        return self.database_path.with_suffix(".checkpoints.sqlite")
+
+    @property
     def llm_configured(self) -> bool:
         return bool(
             self.llm_api_key

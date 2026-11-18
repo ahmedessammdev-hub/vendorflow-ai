@@ -35,7 +35,9 @@ PROOFS = [
 
 @pytest.fixture
 def app(tmp_path: Path) -> Iterator[FastAPI]:
-    application = create_app(Settings(database_path=tmp_path / "test.sqlite"))
+    application = create_app(
+        Settings(database_path=tmp_path / "test.sqlite", llm_api_key=None)
+    )
     yield application
     application.state.engine.dispose()
 
@@ -125,6 +127,12 @@ def test_vf02_return_correct_resubmit_and_vf03_risk(
                     6,
                     current["risk"]["factors"],
                 )
+            waiting = (await http.get(path)).json()
+            assert (
+                waiting["status"] == "AWAITING_APPROVAL"
+                and waiting["version"] == current["version"] + 1
+            )
+            assert waiting.pop("assessment")["ai_status"] == "UNAVAILABLE"
             for method, endpoint, payload in [
                 ("PATCH", path, {"vendor_name": "Change"}),
                 ("POST", path + "/submit", {}),
@@ -134,7 +142,7 @@ def test_vf02_return_correct_resubmit_and_vf03_risk(
                     endpoint,
                     json={"expected_version": current["version"], **payload},
                 )
-                assert result.status_code == 409 and result.json()["current"] == current
+                assert result.status_code == 409 and result.json()["current"] == waiting
             log = (await http.get(path + "/audit")).json()
             assert [e["to_status"] for e in log] == [
                 "DRAFT",
@@ -143,11 +151,14 @@ def test_vf02_return_correct_resubmit_and_vf03_risk(
                 "NEEDS_CHANGES",
                 "SUBMITTED",
                 "UNDER_REVIEW",
+                "AWAITING_APPROVAL",
             ]
-            assert [e["detail"]["version"] for e in log] == list(range(1, 7))
+            assert [e["detail"]["version"] for e in log] == list(range(1, 8))
             filtered = (await http.get(BASE, params={"status": "DRAFT"})).json()
-            assert filtered["items"] == [] and filtered["counts"]["UNDER_REVIEW"] == 1
-            assert (await http.get(BASE)).json()["items"] == [current]
+            assert (
+                filtered["items"] == [] and filtered["counts"]["AWAITING_APPROVAL"] == 1
+            )
+            assert (await http.get(BASE)).json()["items"] == [waiting]
             assert (await http.get(f"{BASE}/{uuid4()}/audit")).status_code == 404
 
     run_async(journey())
