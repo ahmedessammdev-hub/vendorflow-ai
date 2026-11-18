@@ -11,13 +11,27 @@ from app.agents.schemas import IntakeSummary
 from app.core.config import Settings
 
 
-def test_vf04_sdk_contract_and_fallback(tmp_path: Path) -> None:
+@pytest.mark.parametrize("custom_options", [False, True])
+def test_vf04_sdk_contract_and_fallback(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, custom_options: bool
+) -> None:
+    for name in ("LLM_TIMEOUT_SECONDS", "LLM_REASONING_EFFORT", "LLM_MAX_TOKENS"):
+        monkeypatch.delenv(name, raising=False)
     config = Settings(
+        _env_file=None,
         database_path=tmp_path / "test.sqlite",
         llm_api_key=SecretStr("offline-placeholder"),
         llm_model="configured-alias",
         llm_base_url="https://fixture.invalid/v1",
     )
+    if custom_options:
+        config = config.model_copy(
+            update={
+                "llm_timeout_seconds": 120.0,
+                "llm_reasoning_effort": "low",
+                "llm_max_tokens": 4096,
+            }
+        )
     adapter = CompatibleProvider(config)
     messages: list[dict[str, object]] = []
 
@@ -25,7 +39,13 @@ def test_vf04_sdk_contract_and_fallback(tmp_path: Path) -> None:
         assert request.url.path == "/v1/chat/completions"
         data = json.loads(request.read())
         assert data["temperature"] == 0 and "tools" not in data
-        assert request.extensions["timeout"]["read"] == 30.0
+        assert request.extensions["timeout"]["read"] == (
+            120.0 if custom_options else 30.0
+        )
+        if custom_options:
+            assert data["reasoning_effort"] == "low" and data["max_tokens"] == 4096
+        else:
+            assert "reasoning_effort" not in data and "max_tokens" not in data
         messages.append(data)
         if len(messages) == 1:
             assert data["response_format"]["json_schema"]["strict"]
