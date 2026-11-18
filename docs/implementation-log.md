@@ -144,3 +144,46 @@ exit $LASTEXITCODE
 </details>
 
 The prior Phase 0 development dependency advisory remains recorded above. No hosted CI, live Jira, paid LLM or review graph run was part of this gate.
+
+## 2026-11-18 · Phase 2 · Durable human review
+
+Implementation verified at `ae2269ad6ac9037aabcba8b3876e8087de621ff1`. The background review checkpoints each node, publishes AWAITING_APPROVAL after the durable interrupt, and resumes using a persisted decision and the same request UUID. A human approve creates one pending outbox row. Jira dispatch is deferred to Phase 3. Single-worker operation is documented in the README. [LangGraph interrupt semantics](https://docs.langchain.com/oss/python/langgraph/interrupts)
+
+The two schema-bound LLM nodes receive delimited data and have no write tools. The recommendation must cite the original name and typed value of each referenced scalar. Validated responses can be reused during replay. An interrupted provider call is marked unavailable with unknown latency. A configured model may use JSON mode if JSON Schema is unsupported, with at most one repair for invalid output. The installed SDK uses its bundled HTTPX2 transport. Its adapter contract test supplies an in-memory transport with sockets blocked.
+
+| Working directory | Command | Exit | Observation |
+|---|---|---:|---|
+| backend | `uv run ruff check . ../scripts/seed_demo.py` | 0 | Passed |
+| backend | `uv run ruff format --check . ../scripts/seed_demo.py` | 0 | 42 files already formatted |
+| backend | `uv run mypy app` | 0 | 31 source files checked |
+| backend | `uv run pytest -q --tb=short` | 0 | 148 passed |
+| backend | `uv run pytest -q --cov=app --cov-report=term-missing` | 0 | 148 passed, 97% overall |
+| backend | `uv run coverage report --include='*/app/domain/*,app/domain/*' --fail-under=95` | 0 | 100% domain coverage |
+| backend | `uv run alembic upgrade head`, `uv run alembic check` | 0 each | Local DB migrated, no schema drift |
+| frontend | `npm run gen:api`, `npm run lint`, `npm test -- --watch=false`, `npm run build` | 0 each | 2 frontend tests passed, schema and production build passed |
+| backend | `uv run python -c "from app.core.config import Settings; print(Settings().llm_configured)"` | 0 | Configuration unavailable. Live LLM submit SKIPPED. LLM_API_KEY, LLM_BASE_URL and LLM_MODEL all unset. Live tokens, latency, and quality NOT MEASURED. |
+| root | Local smoke command below | 0 | HTTP 202, risk score 6, AI UNAVAILABLE and AWAITING_APPROVAL |
+
+VF-04 checks malformed JSON, repair, schema fallback, unknown fields, mismatched values, provider failure and injection-shaped vendor text. VF-05 checks the durable pause, rejection and changes without an outbox creation. VF-06 disposes and reinstantiates the app using the same databases, including recovery between decision commit and graph resume. The offline race sends 50 concurrent approvals and observes one success, 49 conflicts, one stored decision, one pending operation and zero issue creations.
+
+Initial integration checks exposed an index declared ahead of its column and the SDK timeout type. Both were corrected before the gate. The earlier development-dependency advisory remains open. Hosted CI was not run. Live Jira was outside this phase. The local Swagger server was restarted on the existing port before the final smoke check.
+
+<details>
+<summary>PowerShell smoke from the repository root with the API running</summary>
+
+```powershell
+$ErrorActionPreference='Stop'
+$api='http://127.0.0.1:8427/api'
+$m=Invoke-RestMethod "$api/settings/integrations"
+if ($m.llm_mode -ne 'unavailable' -or $m.jira_mode -ne 'simulation') { throw 'Unexpected integration modes' }
+$b=(Get-Content -Raw sample_data/requests.json | ConvertFrom-Json)[0]
+$b.vendor_name='Cedar Cloud Services - Review Demo'
+$d=Invoke-RestMethod "$api/requests" -Method Post -ContentType application/json -Body ($b | ConvertTo-Json -Depth 8)
+$u="$api/requests/$($d.id)"
+$r=Invoke-WebRequest "$u/submit" -Method Post -ContentType application/json -Body (@{expected_version=$d.version} | ConvertTo-Json)
+for ($i=0; $i -lt 30; $i++) { $v=Invoke-RestMethod $u; if ($v.status -ne 'UNDER_REVIEW') { break }; Start-Sleep -Milliseconds 200 }
+if ($r.StatusCode -ne 202 -or $v.status -ne 'AWAITING_APPROVAL' -or $v.assessment.ai_status -ne 'UNAVAILABLE') { throw 'Unexpected state' }
+[pscustomobject]@{id=$d.id;submit=$r.StatusCode;state=$v.status;ai=$v.assessment.ai_status;score=$v.risk.score} | ConvertTo-Json -Compress
+```
+
+</details>
