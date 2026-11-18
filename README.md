@@ -2,7 +2,7 @@
 
 A local procurement review workspace built with Angular, FastAPI and LangGraph. A requester declares supplier evidence. Deterministic rules identify missing documents and calculate an illustrative risk score. Two bounded model stages draft a summary and recommendation with citations. A reviewer records the decision. Approval queues a Jira operation that the dispatcher can reconcile after a lost response.
 
-[Watch the two-minute walkthrough (MP4)](docs/demo/vendorflow-demo.mp4) · [Model evaluation and case review](docs/model-review.md)
+[Watch the two-minute walkthrough (MP4)](docs/demo/vendorflow-demo.mp4) · [Fixed model vs. automatic routing](docs/routing-comparison.md) · [GitHub Actions](https://github.com/ahmedessammdev-hub/vendorflow-ai/actions/workflows/ci.yml)
 
 ![Supplier workspace](docs/screenshots/dashboard.png)
 
@@ -57,6 +57,8 @@ uv run --project backend python scripts/collect_metrics.py
 For individual commands, see [AGENTS.md](AGENTS.md). To recapture screenshots in `docs/screenshots`, run `npx playwright test` from `frontend`. The collector saves its latest logs and browser captures under `.runtime/metrics/`. The separate live evaluation requires explicit authorization, a configured model, and `scripts/run_llm_eval.py --live`. By default the harness stops if neither stage of the first case returns a validated output. Use `--all-cases` for an authorized exhaustive run. A live Jira verification requires an existing request, its current version, the explicit reviewer decision and a test site. [Live verification procedure](docs/workflows.md)
 
 ## Measured results
+
+The local verification report includes the original live evaluation as its baseline. The new paired run on the revised prompt is documented in the [routing comparison](docs/routing-comparison.md).
 
 <!-- metrics:start -->
 

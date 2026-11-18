@@ -261,3 +261,9 @@ Added a nullable failure-code migration for existing databases. The API and Angu
 The [captioned recording](demo/vendorflow-demo.mp4) uses an isolated Edge session, the synthetic seed requests, disabled model calls and simulated Jira. Regenerate the recording from `frontend/` with `npm run demo:record`. The recording was encoded with FFmpeg and inspected with `ffprobe -v error -show_streams docs/demo/vendorflow-demo.mp4`. The interview script includes the reproducible browser actions.
 
 At source revision `a05d015`, `uv run --project backend python scripts/collect_metrics.py` exited 0 using an isolated database. All 177 backend tests, five Angular tests and both Edge journeys passed. Coverage was 94.7% overall and 100% in the domain layer. Fifty concurrent approvals resulted in one simulated issue. Exact commands, timings, exit codes and archived live model limitations are in [metrics](metrics.md). No new hosted inference or live Jira operation was part of this local gate.
+
+## 2026-11-18 - Public portfolio release and paired FreeLLMAPI evaluation
+
+Published the source, synthetic screenshots and captioned walkthrough to the public GitHub repository. The hosted Windows checks for source `51acdc5` passed, including both Edge journeys. [Hosted run](https://github.com/ahmedessammdev-hub/vendorflow-ai/actions/runs/44386452926)
+
+The two authorized live evaluation commands and the offline comparison command in [the routing comparison](routing-comparison.md) each exited 0. Each arm exercised all 20 cases at the same source revision and input digest. The auto route delivered seven complete assessments. Rate limiting left the fixed route with zero. All cases stopped for human review with no Jira operation. Public JSON files contain case outcomes and bounded diagnostics. Validated text samples stayed in the ignored runtime directory.

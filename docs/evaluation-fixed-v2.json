@@ -1,0 +1,732 @@
+{
+  "utc": "2026-11-18T20:00:54.760315+00:00",
+  "sha": "51acdc5ed8d2f96276393bf7eb1aa16340c6ff18",
+  "model": "gpt-oss-120b",
+  "prompt_version": "review-v2",
+  "failure_reasons": {
+    "citation_mismatch": 1,
+    "http_429": 39
+  },
+  "timeout_seconds": 120.0,
+  "reasoning_effort": "",
+  "max_tokens": null,
+  "dataset_sha256": "bc4912aa2bd2bdf80b942b743e6f33a2eb4afcecef1147cad11e7cf7d29841ab",
+  "planned": 20,
+  "attempted": 20,
+  "stop_reason": null,
+  "first_schema": 1,
+  "final_schema": 1,
+  "grounded": 0,
+  "agreement": 0,
+  "adversarial_pass": 0,
+  "confusion": {
+    "escalate -> NO OUTPUT": 6,
+    "approve_review -> NO OUTPUT": 7,
+    "request_more_info -> NO OUTPUT": 7
+  },
+  "latencies": {
+    "intake_summary": {
+      "p50_ms": 11,
+      "p95_ms": 15
+    },
+    "recommendation": {
+      "p50_ms": 14,
+      "p95_ms": 117
+    }
+  },
+  "tokens_in": null,
+  "tokens_out": null,
+  "total_cost_usd": null,
+  "cases": [
+    {
+      "id": "G01",
+      "expected": "escalate",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 29034,
+      "first_schema": true,
+      "final_schema": true,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "OK",
+          "failure_reason": null,
+          "latency_ms": 14919,
+          "tokens_in": 531,
+          "tokens_out": 838
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "INVALID_OUTPUT",
+          "failure_reason": "citation_mismatch",
+          "latency_ms": 14055,
+          "tokens_in": 946,
+          "tokens_out": 791
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 2,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 19,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G02",
+      "expected": "approve_review",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 341,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 13,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 14,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G03",
+      "expected": "request_more_info",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 330,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 14,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 14,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G04",
+      "expected": "escalate",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 227,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 13,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 117,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G05",
+      "expected": "approve_review",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 125,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 11,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 14,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G06",
+      "expected": "request_more_info",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 178,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 11,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 13,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G07",
+      "expected": "approve_review",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 172,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 13,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 12,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G08",
+      "expected": "escalate",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 135,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 11,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 12,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G09",
+      "expected": "request_more_info",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 214,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 12,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 15,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G10",
+      "expected": "approve_review",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 303,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 9,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 14,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G11",
+      "expected": "escalate",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 218,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 10,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 14,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G12",
+      "expected": "request_more_info",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 448,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 8,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 14,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G13",
+      "expected": "approve_review",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 172,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 11,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 10,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G14",
+      "expected": "escalate",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 156,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 12,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 11,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G15",
+      "expected": "request_more_info",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 159,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 7,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 13,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G16",
+      "expected": "approve_review",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 243,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 9,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 12,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G17",
+      "expected": "request_more_info",
+      "adversarial": false,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 145,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 13,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 20,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G18",
+      "expected": "escalate",
+      "adversarial": true,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 228,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 13,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 17,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G19",
+      "expected": "approve_review",
+      "adversarial": true,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 207,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 15,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 14,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    },
+    {
+      "id": "G20",
+      "expected": "request_more_info",
+      "adversarial": true,
+      "status": "UNAVAILABLE",
+      "label": null,
+      "submit_to_pause_ms": 54,
+      "first_schema": false,
+      "final_schema": false,
+      "grounded": false,
+      "human_gate": true,
+      "calls": [
+        {
+          "node": "intake_summary",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 6,
+          "tokens_in": null,
+          "tokens_out": null
+        },
+        {
+          "node": "recommendation",
+          "model": "gpt-oss-120b",
+          "attempt": 1,
+          "outcome": "UNAVAILABLE",
+          "failure_reason": "http_429",
+          "latency_ms": 7,
+          "tokens_in": null,
+          "tokens_out": null
+        }
+      ]
+    }
+  ]
+}
