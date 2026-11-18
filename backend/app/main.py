@@ -1,21 +1,59 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
-from app.api import health, settings
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from app.api import audit, health, requests, settings
 from app.core.config import Settings
+from app.core.limits import BodyLimit
+from app.persistence.database import make_engine, migrate
+from app.persistence.repositories import Conflict, MissingRequest
 
 
 def create_app(config: Settings | None = None) -> FastAPI:
-    application = FastAPI(title="VendorFlow AI", version="0.1.0")
-    application.state.settings = config if config is not None else Settings()
+    config = config if config is not None else Settings()
+    engine = make_engine(config.database_path)
+
+    @asynccontextmanager
+    async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+        try:
+            migrate(engine)
+            yield
+        finally:
+            engine.dispose()
+
+    application = FastAPI(title="VendorFlow AI", version="0.1.0", lifespan=lifespan)
+    application.state.settings = config
+    application.state.engine = engine
+    application.add_middleware(BodyLimit)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:4200"],
-        allow_methods=["GET"],
+        allow_methods=["GET", "POST", "PATCH"],
         allow_headers=["Content-Type"],
     )
-    application.include_router(health.router, prefix="/api")
-    application.include_router(settings.router, prefix="/api")
+
+    @application.exception_handler(Conflict)
+    async def conflict(request: Request, exc: Conflict) -> JSONResponse:
+        return JSONResponse(
+            {"detail": str(exc), "current": exc.current.model_dump(mode="json")},
+            status_code=409,
+        )
+
+    @application.exception_handler(MissingRequest)
+    async def missing(request: Request, exc: MissingRequest) -> JSONResponse:
+        return JSONResponse({"detail": "Request not found."}, status_code=404)
+
+    @application.exception_handler(RequestValidationError)
+    async def invalid(request: Request, exc: RequestValidationError) -> JSONResponse:
+        errors = [{k: e[k] for k in ("loc", "type", "msg")} for e in exc.errors()]
+        return JSONResponse({"detail": errors}, status_code=422)
+
+    for router in (health.router, settings.router, requests.router, audit.router):
+        application.include_router(router, prefix="/api")
     return application
 
 

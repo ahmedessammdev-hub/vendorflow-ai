@@ -1,0 +1,47 @@
+[
+  {
+    "vendor_name": "Cedar Cloud Services",
+    "service_category": "cloud_hosting",
+    "business_criticality": "high",
+    "sensitive_data_access": true,
+    "requester_department": "Technology",
+    "service_description": "Host a synthetic customer support environment.",
+    "evidence": [
+      {
+        "kind": "business_registration",
+        "present": true
+      },
+      {
+        "kind": "security_questionnaire",
+        "present": true
+      },
+      {
+        "kind": "service_sla",
+        "present": true
+      }
+    ]
+  },
+  {
+    "vendor_name": "Northstar Advisory",
+    "service_category": "consulting",
+    "business_criticality": "low",
+    "sensitive_data_access": false,
+    "requester_department": "Operations",
+    "service_description": "Review a synthetic procurement training plan.",
+    "evidence": []
+  },
+  {
+    "vendor_name": "River Apps",
+    "service_category": "software",
+    "business_criticality": "medium",
+    "sensitive_data_access": false,
+    "requester_department": "Procurement",
+    "service_description": "Provide a scheduling tool for a synthetic team.",
+    "evidence": [
+      {
+        "kind": "business_registration",
+        "present": true
+      }
+    ]
+  }
+]

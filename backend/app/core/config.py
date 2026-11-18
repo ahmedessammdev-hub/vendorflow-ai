@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=REPO_ROOT / ".env", env_file_encoding="utf-8", extra="ignore"
     )
+    database_path: Path = REPO_ROOT / "vendorflow.sqlite"
     llm_api_key: SecretStr | None = None
     llm_base_url: str = ""
     llm_model: str = ""

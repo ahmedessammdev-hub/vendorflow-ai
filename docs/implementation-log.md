@@ -80,3 +80,65 @@ exit $LASTEXITCODE
 - The first pytest run raised pytest_socket.SocketBlockedError while Windows asyncio created its internal wakeup sockets. The test session now prepares its runner before pytest-socket blocks sockets during tests. HTTP checks call the real app through in-process ASGI transport.
 - `npm audit --json` exited 1 with 21 high-severity development-tree findings linked to picomatch. npm reported no compatible automated fix. `npm audit --omit=dev --json` and `npm audit --prefix scripts --json` exited 0 with zero reported findings. Recheck the development chain when a compatible patch becomes available.
 - Local checks ran on Windows. Hosted CI awaits a GitHub run. No live Jira or paid LLM calls were made. Domain coverage, acceptance journeys, AI evaluation and Jira delivery belong to later phases.
+
+## 2026-11-18 · Phase 1 · Domain, persistence and request API
+
+Implemented draft creation, partial edits, filtered lists with global counts, detail, submit and audit history. SQLite persists business data, evidence declarations and versioned risk assessments. Alembic applies the pinned schema at startup. Reviewed the generated migration and added update/delete guards on audit rows. The complete submit path ends at UNDER_REVIEW in this milestone.
+
+### Decisions
+
+- Used the transition table in architecture.md, as required by the phase prompt. Draft creation uses the initial transition. A submit records the intermediate SUBMITTED event and its routing outcome in the same transaction.
+- Every edit or transition advances the version. PATCH replaces the evidence list only when supplied. Conflicts return the current representation. A transaction also rolls back earlier state changes if its audit insert fails.
+- Department labels allow 120 characters and service descriptions 4000. The request body limit applies to length-delimited and streamed JSON. Validation errors exclude input values. Declaration pointers identify synthetic .txt or .pdf filenames.
+- Seed IDs are deterministic. Re-seeding leaves edited drafts and history intact. No new dependencies were introduced. The Angular UI is scheduled for Phase 4. Its generated request types now match the API.
+- During initial verification a method named list shadowed the built-in type and broke mypy and schema export. Renamed it to list_requests. The final runs below passed without this error.
+
+### Local verification
+
+| Working directory | Command | Exit | Result |
+|---|---|---:|---|
+| backend | `uv run ruff check . ../scripts/seed_demo.py` | 0 | Passed |
+| backend | `uv run ruff format --check . ../scripts/seed_demo.py` | 0 | 29 files already formatted |
+| backend | `uv run mypy app` | 0 | 21 source files checked |
+| backend | `uv run pytest -q` | 0 | 136 passed, sockets blocked |
+| backend | `uv run pytest --cov=app --cov-report=term-missing -q` | 0 | 136 passed, 449 of 452 statements covered, 99% reported |
+| backend | `uv run coverage report --include='*/app/domain/*,app/domain/*' --fail-under=95` | 0 | 136 of 136 domain statements covered, 100% |
+| backend | `uv run alembic check` | 0 | No new upgrade operations detected against the migrated SQLite file |
+| frontend | `npm run gen:api`, `npm run lint` | 0 each | Exported types and checked UI sources |
+| frontend | `npm test -- --watch=false` | 0 | 2 passed |
+| frontend | `npm run build` | 0 | Schema check and production compilation passed |
+| root | `uv run --project backend python scripts/seed_demo.py`, twice | 0 each | 3 created, then 3 reported existing |
+| frontend | Edge Swagger smoke, PowerShell command below | 0 | GET /api/requests returned HTTP 200 with all three synthetic drafts |
+
+The VF-01, VF-02 and VF-03 checks cover persistence across a new engine, a corrected resubmission, the evidence matrix and risk factors. The suite also covers the complete transition matrix, a stale edit and simultaneous competing edits, database uniqueness definitions, append-only audit protection, rollback of a failed audit insert and body-size validation.
+
+From backend, serve the app with `uv run uvicorn app.main:app --host 127.0.0.1 --port 8427`.
+
+<details>
+<summary>Swagger browser check from frontend</summary>
+
+```powershell
+@'
+import { chromium, expect } from '@playwright/test';
+const browser = await chromium.launch({channel:'msedge'});
+try {
+ const page = await browser.newPage();
+ await page.goto('http://127.0.0.1:8427/docs', {waitUntil:'domcontentloaded'});
+ const op = page.locator('.opblock-get').filter({has: page.locator('[data-path="/api/requests"]')});
+ await op.locator('.opblock-summary').click({timeout:20000});
+ await op.getByRole('button',{name:'Try it out'}).click();
+ const response = page.waitForResponse(r => r.url() === 'http://127.0.0.1:8427/api/requests');
+ await op.getByRole('button',{name:'Execute',exact:true}).click();
+ const r = await response;
+ expect(r.status()).toBe(200);
+ const {items} = await r.json();
+ for (const name of ['Cedar Cloud Services','Northstar Advisory','River Apps']) expect(items.some(i=>i.vendor_name===name)).toBe(true);
+ console.log('Swagger GET',r.status(), items.map(i=>[i.vendor_name,i.status,i.risk.score,i.missing_evidence]));
+} finally { await browser.close(); }
+'@ | node --input-type=module
+exit $LASTEXITCODE
+```
+
+</details>
+
+The prior Phase 0 development dependency advisory remains recorded above. No hosted CI, live Jira, paid LLM or review graph run was part of this gate.

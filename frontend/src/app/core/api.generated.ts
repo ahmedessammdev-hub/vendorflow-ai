@@ -34,10 +34,188 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Requests */
+        get: operations["list_requests_api_requests_get"];
+        put?: never;
+        /** Create Request */
+        post: operations["create_request_api_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/{request_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Request */
+        get: operations["get_request_api_requests__request_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit Request */
+        patch: operations["edit_request_api_requests__request_id__patch"];
+        trace?: never;
+    };
+    "/api/requests/{request_id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Request */
+        post: operations["submit_request_api_requests__request_id__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/requests/{request_id}/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Audit History */
+        get: operations["audit_history_api_requests__request_id__audit_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AuditView */
+        AuditView: {
+            /** Id */
+            id: number;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Event Type */
+            event_type: string;
+            /** Actor Type */
+            actor_type: string;
+            from_status: components["schemas"]["Status"] | null;
+            to_status: components["schemas"]["Status"];
+            /** Detail */
+            detail: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /**
+         * Category
+         * @enum {string}
+         */
+        Category: "cloud_hosting" | "software" | "consulting";
+        /** ConflictView */
+        ConflictView: {
+            /** Detail */
+            detail: string;
+            current: components["schemas"]["RequestView"];
+        };
+        /** CreateRequest */
+        CreateRequest: {
+            /** Vendor Name */
+            vendor_name: string;
+            service_category: components["schemas"]["Category"];
+            business_criticality: components["schemas"]["Criticality"];
+            /** Sensitive Data Access */
+            sensitive_data_access: boolean;
+            /** Requester Department */
+            requester_department: string;
+            /** Service Description */
+            service_description: string;
+            /** Evidence */
+            evidence?: components["schemas"]["Evidence"][];
+            /**
+             * Expected Version
+             * @default 0
+             * @constant
+             */
+            expected_version: 0;
+        };
+        /**
+         * Criticality
+         * @enum {string}
+         */
+        Criticality: "low" | "medium" | "high";
+        /** EditRequest */
+        EditRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Vendor Name */
+            vendor_name?: string;
+            /** Service Category */
+            service_category?: components["schemas"]["Category"];
+            /** Business Criticality */
+            business_criticality?: components["schemas"]["Criticality"];
+            /** Sensitive Data Access */
+            sensitive_data_access?: boolean;
+            /** Requester Department */
+            requester_department?: string;
+            /** Service Description */
+            service_description?: string;
+            /** Evidence */
+            evidence?: components["schemas"]["Evidence"][];
+        };
+        /** Evidence */
+        Evidence: {
+            kind: components["schemas"]["EvidenceKind"];
+            /** Present */
+            present: boolean;
+            /** Pointer */
+            pointer?: string | null;
+        };
+        /**
+         * EvidenceKind
+         * @enum {string}
+         */
+        EvidenceKind: "business_registration" | "security_questionnaire" | "service_sla";
+        /** Factor */
+        Factor: {
+            /** Field */
+            field: string;
+            /** Reason */
+            reason: string;
+            /** Points */
+            points: number;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
         /** Health */
         Health: {
             /**
@@ -81,6 +259,89 @@ export interface components {
              * @enum {string}
              */
             jira_mode: "simulation" | "live";
+        };
+        /** RequestList */
+        RequestList: {
+            /** Items */
+            items: components["schemas"]["RequestView"][];
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+        };
+        /** RequestView */
+        RequestView: {
+            /** Vendor Name */
+            vendor_name: string;
+            service_category: components["schemas"]["Category"];
+            business_criticality: components["schemas"]["Criticality"];
+            /** Sensitive Data Access */
+            sensitive_data_access: boolean;
+            /** Requester Department */
+            requester_department: string;
+            /** Service Description */
+            service_description: string;
+            /** Evidence */
+            evidence?: components["schemas"]["Evidence"][];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            status: components["schemas"]["Status"];
+            /** Version */
+            version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Required Evidence */
+            required_evidence: components["schemas"]["EvidenceKind"][];
+            /** Missing Evidence */
+            missing_evidence: components["schemas"]["EvidenceKind"][];
+            risk: components["schemas"]["Risk"];
+        };
+        /** Risk */
+        Risk: {
+            /** Score */
+            score: number;
+            band: components["schemas"]["RiskBand"];
+            /** Factors */
+            factors: components["schemas"]["Factor"][];
+        };
+        /**
+         * RiskBand
+         * @enum {string}
+         */
+        RiskBand: "LOW" | "MEDIUM" | "HIGH";
+        /**
+         * Status
+         * @enum {string}
+         */
+        Status: "DRAFT" | "SUBMITTED" | "NEEDS_CHANGES" | "UNDER_REVIEW" | "AWAITING_APPROVAL" | "APPROVED" | "REJECTED" | "JIRA_PENDING" | "JIRA_CREATED" | "JIRA_FAILED";
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
+        };
+        /** Versioned */
+        Versioned: {
+            /** Expected Version */
+            expected_version: number;
         };
     };
     responses: never;
@@ -127,6 +388,229 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IntegrationModes"];
+                };
+            };
+        };
+    };
+    list_requests_api_requests_get: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["Status"] | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_request_api_requests_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_request_api_requests__request_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    edit_request_api_requests__request_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestView"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConflictView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_request_api_requests__request_id__submit_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Versioned"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestView"];
+                };
+            };
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestView"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConflictView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    audit_history_api_requests__request_id__audit_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

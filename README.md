@@ -1,6 +1,6 @@
 # VendorFlow AI
 
-A local portfolio demo for procurement review using synthetic supplier data. The bootstrap release serves an empty dashboard and reports the configured integration modes. The full journey and acceptance criteria are in [the product spec](docs/spec.md) and [approved addendum](docs/spec-addendum.md).
+A local portfolio demo for procurement review using synthetic supplier data. The request API now persists synthetic drafts, checks declared evidence, calculates risk and records the request history. The Angular dashboard currently displays integration modes. The full journey and acceptance criteria are in [the product spec](docs/spec.md) and [approved addendum](docs/spec-addendum.md).
 
 ## Run on Windows
 
@@ -29,7 +29,21 @@ Open [the dashboard](http://localhost:4200). The development server proxies API 
 
 If port 8000 is occupied, launch uvicorn with `--port 8426`, then set `$env:VENDORFLOW_API_PORT = "8426"` in the dashboard terminal before running `npm start`. To choose another dashboard port, run `npm start -- --port 4426`.
 
-## Verify the bootstrap
+## Try a supplier request
+
+From the repository root, seed the three synthetic drafts. Rerunning the command keeps any edits you made.
+
+```powershell
+uv run --project backend python scripts/seed_demo.py
+```
+
+Open the API server's interactive [/docs](http://127.0.0.1:8000/docs). Run `GET /api/requests` and copy a request ID and its current version. Submit Cedar with `POST /api/requests/{id}/submit` and a body containing `expected_version`. The complete request returns HTTP 202, UNDER_REVIEW and the factors behind its score. Phase 1 stops here. Submit Northstar to see the missing registration. PATCH its latest version with a complete replacement evidence list, then resubmit. Query `GET /api/requests/{id}/audit` for the ordered history.
+
+New drafts start at version 1. Every saved edit and transition increments the version. A 409 includes the current request so the caller can review concurrent changes. List counts cover all statuses even when the items are filtered. An optional evidence pointer names a synthetic .txt or .pdf file under sample_data/evidence. Evidence declarations are stored without opening files.
+
+The API migrates vendorflow.sqlite in the repository root on startup. Set DATABASE_PATH to an absolute path to use a separate database. The seed script and Alembic CLI use the same setting.
+
+## Verify the implementation
 
 In `backend/`, run each check in order.
 
@@ -49,4 +63,4 @@ npm test -- --watch=false
 npm run build
 ```
 
-Phase verification is recorded in [the implementation log](docs/implementation-log.md). [The phase plan](CODEX_PROMPTS.md) defines later request, review, integration and evaluation milestones.
+Phase verification is recorded in [the implementation log](docs/implementation-log.md). [The phase plan](CODEX_PROMPTS.md) defines the remaining review, integration, interface and evaluation milestones.
