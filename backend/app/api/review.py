@@ -19,4 +19,6 @@ def record_decision(
         request.app.state.engine, request_id, body, request.app.state.settings.jira_mode
     )
     background.add_task(request.app.state.workflow.drive, request_id)
+    if body.action == "approve":
+        background.add_task(request.app.state.dispatcher.dispatch, request_id)
     return result

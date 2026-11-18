@@ -10,9 +10,12 @@ from starlette.concurrency import run_in_threadpool
 from app.agents.graph import build_graph
 from app.agents.llm_adapter import CompatibleProvider, Provider
 from app.agents.nodes import ReviewNodes
-from app.api import audit, health, requests, review, settings
+from app.api import audit, health, jira, requests, review, settings
 from app.core.config import Settings
 from app.core.limits import BodyLimit
+from app.integration.dispatcher import Dispatcher
+from app.integration.jira_client import JiraClient, LiveJira
+from app.integration.jira_sim import SimulatedJira
 from app.persistence.checkpointer import open_checkpointer
 from app.persistence.database import make_engine, migrate
 from app.persistence.repositories import Conflict, MissingRequest
@@ -47,6 +50,14 @@ def create_app(
                     engine, build_graph(nodes, saver)
                 )
                 await run_in_threadpool(application.state.workflow.recover)
+                clients: dict[str, JiraClient] = {"simulation": SimulatedJira(engine)}
+                if config.jira_mode == "live":
+                    live_jira = LiveJira(config)
+                    stack.callback(live_jira.http.close)
+                    clients["live"] = live_jira
+                dispatcher = Dispatcher(engine, clients)
+                application.state.dispatcher = dispatcher
+                await run_in_threadpool(dispatcher.recover)
                 yield
         finally:
             engine.dispose()
@@ -84,6 +95,7 @@ def create_app(
         requests.router,
         audit.router,
         review.router,
+        jira.router,
     ):
         application.include_router(router, prefix="/api")
     return application

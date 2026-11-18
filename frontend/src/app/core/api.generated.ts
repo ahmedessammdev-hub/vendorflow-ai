@@ -121,6 +121,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/requests/{request_id}/jira/reconcile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reconcile */
+        post: operations["reconcile_api_requests__request_id__jira_reconcile_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -325,6 +342,31 @@ export interface components {
              */
             jira_mode: "simulation" | "live";
         };
+        /** JiraView */
+        JiraView: {
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "simulation" | "live";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "PENDING" | "IN_FLIGHT" | "CREATED" | "FAILED" | "UNCERTAIN";
+            /** Attempts */
+            attempts: number;
+            /** Issue Key */
+            issue_key: string | null;
+            /** Issue Url */
+            issue_url: string | null;
+            /** Last Error */
+            last_error: string | null;
+            /** Last Checked At */
+            last_checked_at: string | null;
+            /** Retry At */
+            retry_at: string | null;
+        };
         /** Recommendation */
         Recommendation: {
             /**
@@ -340,6 +382,18 @@ export interface components {
             citations: components["schemas"]["Citation"][];
             /** Caution */
             caution: string;
+        };
+        /** Reconcile */
+        Reconcile: {
+            /** Expected Version */
+            expected_version: number;
+            /** Reviewer Label */
+            reviewer_label: string;
+            /**
+             * Checked Jira And No Issue Exists
+             * @default false
+             */
+            checked_jira_and_no_issue_exists: boolean;
         };
         /** RequestDetail */
         RequestDetail: {
@@ -378,6 +432,7 @@ export interface components {
             /** Missing Evidence */
             missing_evidence: components["schemas"]["EvidenceKind"][];
             risk: components["schemas"]["Risk"];
+            jira?: components["schemas"]["JiraView"] | null;
             assessment?: components["schemas"]["AssessmentView"] | null;
         };
         /** RequestList */
@@ -752,6 +807,50 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestView"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConflictView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reconcile_api_requests__request_id__jira_reconcile_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Reconcile"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };

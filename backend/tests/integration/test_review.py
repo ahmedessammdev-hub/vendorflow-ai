@@ -197,7 +197,16 @@ def test_vf06_restart_and_vf09_concurrent_approvals(
                 *(http.post(path + "/decision", json=decision) for _ in range(50))
             )
             assert sorted(r.status_code for r in results) == [200] + [409] * 49
-            assert (await http.get(path)).json()["status"] == "JIRA_PENDING"
+            assert (
+                next(r.json() for r in results if r.status_code == 200)["status"]
+                == "JIRA_PENDING"
+            )
+            delivered = (await http.get(path)).json()
+            assert delivered["status"] == "JIRA_CREATED"
+            assert (
+                delivered["jira"]["issue_key"] == "SIM-1"
+                and delivered["jira"]["issue_url"] is None
+            )
             events = (await http.get(path + "/audit")).json()
             approved = [e for e in events if e["to_status"] == "APPROVED"]
             assert (
@@ -208,9 +217,9 @@ def test_vf06_restart_and_vf09_concurrent_approvals(
                 op = conn.execute(select(jira_operation)).mappings().one()
                 assert (op["mode"], op["status"], op["attempts"], op["issue_key"]) == (
                     "simulation",
-                    "PENDING",
-                    0,
-                    None,
+                    "CREATED",
+                    1,
+                    "SIM-1",
                 )
                 assert (
                     conn.execute(select(review_decision.c.reason)).scalar_one()

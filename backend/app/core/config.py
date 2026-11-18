@@ -1,7 +1,8 @@
+import re
 from pathlib import Path
 from typing import Literal
 
-from pydantic import SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -9,13 +10,32 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=REPO_ROOT / ".env", env_file_encoding="utf-8", extra="ignore"
+        env_file=REPO_ROOT / ".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        hide_input_in_errors=True,
     )
     database_path: Path = REPO_ROOT / "vendorflow.sqlite"
     llm_api_key: SecretStr | None = None
     llm_base_url: str = ""
     llm_model: str = ""
     jira_mode: Literal["simulation", "live"] = "simulation"
+
+    jira_base_url: str = ""
+    jira_project_key: str = Field(default="", pattern=r"^(?:[A-Z][A-Z0-9_]{0,39})?$")
+    jira_issue_type: str = "Task"
+    jira_email: str = ""
+    jira_api_token: SecretStr | None = None
+
+    @field_validator("jira_base_url")
+    @classmethod
+    def jira_site(cls, value: str) -> str:
+        site = value.removesuffix("/").lower()
+        if site and not re.fullmatch(
+            r"https://[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.atlassian\.net", site
+        ):
+            raise ValueError("Use the HTTPS origin of your Atlassian Cloud site.")
+        return site
 
     @property
     def checkpoint_path(self) -> Path:

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated, Literal
 
 from pydantic import Field, StrictBool, StrictStr, StringConstraints
@@ -40,7 +41,26 @@ class AssessmentView(Model):
     recommendation: Recommendation | None
 
 
+class JiraView(Model):
+    mode: Literal["simulation", "live"]
+    status: Literal["PENDING", "IN_FLIGHT", "CREATED", "FAILED", "UNCERTAIN"]
+    attempts: int
+    issue_key: str | None
+    issue_url: str | None
+    last_error: str | None
+    last_checked_at: datetime | None
+    retry_at: datetime | None
+
+
+class Reconcile(Versioned):
+    reviewer_label: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)
+    ]
+    checked_jira_and_no_issue_exists: StrictBool = False
+
+
 class RequestDetail(RequestView):
+    jira: JiraView | None = None
     assessment: AssessmentView | None = None
 
 

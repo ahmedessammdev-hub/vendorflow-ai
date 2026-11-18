@@ -39,7 +39,9 @@ uv run --project backend python scripts/seed_demo.py
 
 Open the API server's interactive [/docs](http://127.0.0.1:8000/docs). Run `GET /api/requests` and copy a request ID and its current version. Submit Cedar with `POST /api/requests/{id}/submit` and a body containing `expected_version`. The complete request returns HTTP 202, UNDER_REVIEW and the factors behind its score. Poll GET on the request until AWAITING_APPROVAL. The detail response includes the AI summary, recommendation, model, cited fields and values, and AI status. With empty LLM settings it shows UNAVAILABLE and the reviewer can still decide. Submit Northstar to see the missing registration. PATCH its latest version with a complete replacement evidence list, then resubmit. Query `GET /api/requests/{id}/audit` for the ordered history.
 
-At AWAITING_APPROVAL, send the current `expected_version`, `reviewer_label`, `reason` and `action` to `POST /api/requests/{id}/decision`. Actions are approve, reject and request_changes. Approval records the decision and queues one Jira operation. Dispatch is planned for Phase 3. Request changes allows editing and resubmitting the same request for another review.
+At AWAITING_APPROVAL, send the current `expected_version`, `reviewer_label`, `reason` and `action` to `POST /api/requests/{id}/decision`. Actions are approve, reject and request_changes. Approval records the decision and queues one Jira operation. Poll the request detail for its delivery result. In the default simulation a successful delivery has a `SIM-…` key and a null `issue_url`. Request changes allows editing and resubmitting the same request for another review.
+
+If delivery is uncertain, `POST /api/requests/{id}/jira/reconcile` with the current `expected_version` and `reviewer_label` searches for the original request marker. To authorize another create after an inconclusive empty search, the reviewer must first check Jira and send `checked_jira_and_no_issue_exists` set to `true`. That confirmation is recorded in the audit history.
 
 The local single-worker server stores LangGraph checkpoints beside the business database. Keep the two files together when moving the demo. On startup, the server recovers pending review work and resumes decisions already committed to SQLite. A submitted review makes external model calls only when LLM_API_KEY, LLM_BASE_URL and LLM_MODEL are configured. Put real credentials in the ignored root .env. Restart the backend after changing it.
 
@@ -67,4 +69,4 @@ npm test -- --watch=false
 npm run build
 ```
 
-Phase verification is recorded in [the implementation log](docs/implementation-log.md). [The phase plan](CODEX_PROMPTS.md) defines the remaining Jira delivery, interface and evaluation milestones.
+Phase verification is recorded in [the implementation log](docs/implementation-log.md). [The phase plan](CODEX_PROMPTS.md) defines the remaining interface and evaluation milestones.

@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import Engine, insert, select
 
-from app.agents.schemas import AssessmentView, HumanDecision, RequestDetail
+from app.agents.schemas import AssessmentView, HumanDecision, JiraView, RequestDetail
 from app.domain.enums import Status
 from app.domain.models import RequestView
 from app.persistence import repositories as repo
@@ -16,6 +16,26 @@ def detail(engine: Engine, key: UUID) -> RequestDetail:
         result = RequestDetail(**request.model_dump())
         if request.status in {Status.DRAFT, Status.NEEDS_CHANGES, Status.SUBMITTED}:
             return result
+        operation = (
+            conn.execute(select(jira_operation).filter_by(request_id=str(key)))
+            .mappings()
+            .one_or_none()
+        )
+        if operation:
+            issue_key = operation["issue_key"]
+            link = None
+            if (
+                operation["mode"] == "live"
+                and operation["status"] == "CREATED"
+                and operation["site"]
+                and issue_key
+                and not issue_key.startswith("SIM-")
+            ):
+                link = f"{operation['site']}/browse/{issue_key}"
+            result.jira = JiraView.model_validate(
+                {k: operation[k] for k in JiraView.model_fields if k != "issue_url"}
+                | {"issue_url": link}
+            )
         row = (
             conn.execute(
                 select(assessment)

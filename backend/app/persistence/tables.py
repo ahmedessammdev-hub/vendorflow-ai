@@ -113,9 +113,18 @@ jira_operation = Table(
     Column("attempts", Integer, nullable=False, server_default="0"),
     Column("last_error", Text),
     Column("last_checked_at", String(40)),
+    Column("site", String(253)),
+    Column("retry_at", String(40)),
     UniqueConstraint("request_id"),
     choices("mode", ["simulation", "live"]),
     choices("status", ["PENDING", "IN_FLIGHT", "CREATED", "FAILED", "UNCERTAIN"]),
+)
+
+simulated_issue = Table(
+    "simulated_issue",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("marker", String(80), nullable=False),
 )
 
 audit_event = Table(
