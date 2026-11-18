@@ -187,3 +187,35 @@ if ($r.StatusCode -ne 202 -or $v.status -ne 'AWAITING_APPROVAL' -or $v.assessmen
 ```
 
 </details>
+
+## 2026-11-18 • Phase 3 Jira delivery
+
+Implementation commit `4edb1a5`. The API delivers one operation per approved supplier request. The default client persists a simulated issue. The dispatcher records progress, searches the request marker after a lost acknowledgement and requires an audited human confirmation to attempt a new create following an empty, inconclusive search. After restart, interrupted operations remain available for reconciliation. The single-worker constraint still applies.
+
+| Directory | Command | Exit | Observed result |
+| --- | --- | --- | --- |
+| backend | `uv run ruff check . ../scripts`, `uv run ruff format --check . ../scripts`, `uv run mypy app` | 0 each | Lint and formatting passed, 37 app source files type-checked |
+| backend | `uv run pytest -q --tb=short --cov=app --cov-report=term-missing --hypothesis-show-statistics` | 0 | 170 passed, 95% total coverage. The create-call guard reported 0 calls before persisted approval. Includes randomized API actions, restart and concurrent decisions. |
+| backend | `uv run coverage report --include='*/app/domain/*,app/domain/*' --fail-under=95` | 0 | 100% domain coverage |
+| backend | `uv run alembic upgrade head`, `uv run alembic check` | 0 each | Local database at head, no pending schema changes |
+| frontend | `npm run gen:api`, `npm run lint`, `npm test -- --watch=false`, `npm run build` | 0 each | Types regenerated, 2 tests passed, production build passed its API drift check |
+| root | `$env:VENDORFLOW_LIVE_LLM='1'; uv run --project backend python scripts/verify_workflow.py --llm-once` | 1 | One synthetic submission. Live VF-04 failed. Both calls timed out before response headers. |
+| root | Local read-only smoke below | 0 | Reconcile endpoint served, health ok, Jira simulation, AI unavailable for the existing trial |
+
+The trial used the NVIDIA endpoint with `moonshotai/kimi-k3.1-pro`. Intake summary took 30,264 ms and recommendation took 30,151 ms. Neither call returned token usage or generated text. The request reached AWAITING_APPROVAL with AI status UNAVAILABLE. No further inference was attempted. A separate catalog GET returned HTTP 200 and listed the requested model. The cause of the inference timeout remains undetermined.
+
+The Jira adapter uses the project-scoped create-metadata endpoint and its issueTypes array. Jira also documents 422 for create, handled as a definite rejection. Reconciliation uses enhanced JQL search. VF-07, VF-09 and VF-10 exercise these paths offline. No live Jira call was made during this phase. Hosted CI, browser workflow tests and the full evaluation report remain outside this gate. [Atlassian issue endpoints](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/) and [Atlassian issue search](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/).
+
+<details>
+<summary>Read-only check against the updated local API</summary>
+
+```powershell
+$api='http://127.0.0.1:8427'
+$schema=Invoke-RestMethod "$api/openapi.json" -TimeoutSec 8
+$r=Invoke-RestMethod "$api/api/requests/a8a46fb8-c9ae-4743-a321-fc33dae13277" -TimeoutSec 8
+$health=Invoke-RestMethod "$api/api/health" -TimeoutSec 8
+if (!$schema.paths.PSObject.Properties.Match('*reconcile').Count -or $r.status -ne 'AWAITING_APPROVAL' -or $r.assessment.ai_status -ne 'UNAVAILABLE' -or $health.jira_mode -ne 'simulation') { throw 'Unexpected local deployment' }
+[pscustomobject]@{service=$schema.info.title;health=$health.status;jira=$health.jira_mode;llm=$health.llm_mode;review=$r.status;ai=$r.assessment.ai_status;reconcile=$true} | ConvertTo-Json -Compress
+```
+
+</details>
