@@ -1,6 +1,6 @@
 # Acceptance evidence
 
-Generated 2026-11-18T17:26:36+00:00 at commit `1948751a357c4b85573b6c8f6f5e26e1ea614b09`. Windows-11-10.0.26300-SP0, AMD64, Python 3.12.14, Node v24.19.0.
+Generated 2026-11-18T19:29:13+00:00 at commit `a05d0151a6785ecadf31d3a84a046bd8160ac188`. Windows-11-10.0.26300-SP0, AMD64, Python 3.12.14, Node v24.19.0.
 
 Local gates use Jira simulation. Randomized tests and load measurements use offline or fixture AI. Load measurements use 200 observations per endpoint through in-process ASGI and include background work. The separate live evaluation used auto at `2c58be43293bafa17a3f8db5817e623eda63fb35`, 20/20 cases attempted.
 

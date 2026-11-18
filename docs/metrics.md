@@ -1,33 +1,33 @@
 # VendorFlow verification and measurements
 
-Generated 2026-11-18T17:26:36+00:00 at commit `1948751a357c4b85573b6c8f6f5e26e1ea614b09`. Windows-11-10.0.26300-SP0, AMD64, Python 3.12.14, Node v24.19.0.
+Generated 2026-11-18T19:29:13+00:00 at commit `a05d0151a6785ecadf31d3a84a046bd8160ac188`. Windows-11-10.0.26300-SP0, AMD64, Python 3.12.14, Node v24.19.0.
 
 Local gates use Jira simulation. Randomized tests and load measurements use offline or fixture AI. Load measurements use 200 observations per endpoint through in-process ASGI and include background work. The separate live evaluation used auto at `2c58be43293bafa17a3f8db5817e623eda63fb35`, 20/20 cases attempted.
 
 | Metric | Measured value | Target | Status |
 |---|---|---|---|
 | Automated VF criteria | 10/10 | 10/10 | PASS |
-| Backend tests | 173/173 | all pass | PASS |
+| Backend tests | 177/177 | all pass | PASS |
 | Pre-approval Jira creates | 0 | 0 | PASS |
-| Property-test sequences | 591 | >=500 | PASS |
+| Property-test sequences | 560 | >=500 | PASS |
 | Fault paths exercised | 6/6 | 6/6 | PASS |
-| Coverage, overall | 95.3% | ≥85% | PASS |
+| Coverage, overall | 94.7% | ≥85% | PASS |
 | Coverage, domain | 100.0% | ≥95% | PASS |
 | Lint and type errors | 0 | 0 | PASS |
 | Frontend tests | 5 passed | 0 failures | PASS |
-| Initial JavaScript | 412,440 bytes | report | Reported |
+| Initial JavaScript | 373,172 bytes | report | Reported |
 | Browser journeys | 2/2 | 2/2 | PASS |
 | Serious/critical axe findings | 0 on 5 screens | 0 on ≥4 | PASS |
 | Paused review survives real server restart | PASS | pass | PASS |
 | 50 concurrent approvals | 1 accepted, 49 conflicts, 1 operation, 1 create, 1 issue | 1 operation and 1 create | PASS |
-| API create | p50 4.01 / p95 5.56 ms | p95 < 200 ms | PASS |
-| API submit_to_pause | p50 36.44 / p95 50.01 ms | p95 < 1000 ms | PASS |
-| API decision | p50 20.81 / p95 27.16 ms | p95 < 200 ms | PASS |
-| API list | p50 15.98 / p95 25.64 ms | p95 < 100 ms | PASS |
-| API detail | p50 2.05 / p95 2.86 ms | p95 < 100 ms | PASS |
-| API audit | p50 1.95 / p95 2.65 ms | p95 < 100 ms | PASS |
-| API metrics | p50 1.68 / p95 2.48 ms | p95 < 100 ms | PASS |
-| API health | p50 0.65 / p95 0.88 ms | p95 < 100 ms | PASS |
+| API create | p50 2.84 / p95 3.78 ms | p95 < 200 ms | PASS |
+| API submit_to_pause | p50 27.1 / p95 35.22 ms | p95 < 1000 ms | PASS |
+| API decision | p50 14.95 / p95 18.2 ms | p95 < 200 ms | PASS |
+| API list | p50 10.96 / p95 16.23 ms | p95 < 100 ms | PASS |
+| API detail | p50 2.07 / p95 2.8 ms | p95 < 100 ms | PASS |
+| API audit | p50 1.65 / p95 2.08 ms | p95 < 100 ms | PASS |
+| API metrics | p50 1.46 / p95 1.86 ms | p95 < 100 ms | PASS |
+| API health | p50 0.58 / p95 0.74 ms | p95 < 100 ms | PASS |
 | First-pass schema validity | 12/20 (60.0%) | report | Reported |
 | Schema validity after repair | 12/20 (60.0%) | ≥95% | MISS |
 | Grounded recommendation per case | 13/20 (65.0%) | ≥100% | MISS |

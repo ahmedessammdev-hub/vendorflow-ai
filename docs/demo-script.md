@@ -12,4 +12,6 @@ Use synthetic supplier data. Open the local dashboard with Jira in Simulation. T
 | 1:50–2:20 | Choose Approve on this synthetic demo request. Inspect the simulated issue, audit reason and timestamps, then refresh. | One operation is stored per request. A lost acknowledgement triggers a marker search before another create can be considered. |
 | 2:20–3:00 | Switch back to Requester and open Northstar. Submit the incomplete draft, inspect missing evidence, edit, save and resubmit. | The deterministic checklist blocks incomplete submissions. Reviewers can reject a corrected request without a Jira create. |
 
+To regenerate the MP4 on Windows, install the project dependencies and ensure Edge and FFmpeg (with libass) are available. From `frontend/`, run `npm run demo:record`. The recorder starts its own servers and temporary workspace, captures the two supplier journeys, adds English captions and writes `docs/demo/vendorflow-demo.mp4`.
+
 [Dashboard](screenshots/dashboard.png) · [Intake](screenshots/request-form.png) · [Queue](screenshots/review-queue.png) · [Completed review](screenshots/request-detail.png) · [Metrics](screenshots/metrics.png)

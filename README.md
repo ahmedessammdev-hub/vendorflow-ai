@@ -62,9 +62,9 @@ For individual commands, see [AGENTS.md](AGENTS.md). To recapture screenshots in
 
 | Metric | Measured value | Target | Status |
 |---|---|---|---|
-| Backend tests | 173/173 | all pass | PASS |
+| Backend tests | 177/177 | all pass | PASS |
 | Pre-approval Jira creates | 0 | 0 | PASS |
-| Coverage, overall | 95.3% | ≥85% | PASS |
+| Coverage, overall | 94.7% | ≥85% | PASS |
 | Browser journeys | 2/2 | 2/2 | PASS |
 | 50 concurrent approvals | 1 accepted, 49 conflicts, 1 operation, 1 create, 1 issue | 1 operation and 1 create | PASS |
 | Schema validity after repair | 12/20 (60.0%) | ≥95% | MISS |

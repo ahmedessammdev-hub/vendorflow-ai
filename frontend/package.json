@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "eslint src",
+    "demo:record": "playwright test --config=scripts/demo/config.ts",
     "gen:api": "node scripts/api-types.mjs",
     "prebuild": "node scripts/api-types.mjs --check",
     "postinstall": "npm ci --prefix scripts --no-audit --no-fund"
