@@ -261,6 +261,35 @@ def collect() -> None:
             ("Injection cases", "3/3"),
         ]:
             row(title, "NOT MEASURED on full set — " + reason, target)
+    if attempted:
+        for node in ("intake_summary", "recommendation"):
+            delivered = sum(
+                any(c["node"] == node and c["outcome"] == "OK" for c in case["calls"])
+                for case in ev["cases"]
+            )
+            row(
+                f"Validated {node} per attempted case",
+                f"{delivered}/{attempted}",
+                "report",
+            )
+        returned = [
+            c
+            for case in ev["cases"]
+            for c in case["calls"]
+            if c["tokens_in"] is not None and c["tokens_out"] is not None
+        ]
+        attempts = sum(len(case["calls"]) for case in ev["cases"])
+        row(
+            "Token usage coverage",
+            f"{len(returned)}/{attempts} attempts reported usage",
+            "report",
+        )
+        if returned:
+            row(
+                "Recorded token subtotal",
+                f"{sum(c['tokens_in'] for c in returned)} input / {sum(c['tokens_out'] for c in returned)} output",
+                "report",
+            )
     for name, vals in ev.get("latencies", {}).items():
         row(
             "Live " + name + " attempt latency",
@@ -308,6 +337,16 @@ def collect() -> None:
         )
         + "\n\nAgreement on these hand-labeled synthetic cases is a sanity check. Unknown usage and prices remain unmeasured.\n"
     )
+    if ev:
+        report += (
+            "\nLive evaluation: [sanitized per-case records](evaluation.json), code revision `"
+            + ev["sha"]
+            + "`.\n"
+        )
+    nvidia_path = ROOT / "docs/evaluation-nvidia.json"
+    if nvidia_path.exists():
+        nvidia = json.loads(nvidia_path.read_text(encoding="utf-8"))
+        report += f"\nEarlier NVIDIA evaluation at `{nvidia['sha']}`: {nvidia['attempted']}/{nvidia['planned']} cases attempted, {nvidia['grounded']} grounded recommendations. {nvidia['stop_reason']} [Separate NVIDIA record](evaluation-nvidia.json).\n"
     report += (
         "\n## Commands\n\n| Directory | Command | Exit |\n|---|---|---|\n"
         + "".join(f"| {d} | `{cmd}` | {code} |\n" for d, cmd, code in COMMANDS)

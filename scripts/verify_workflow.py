@@ -116,8 +116,27 @@ async def live_review() -> int:
         provider.client.close()
 
 
+def serve_smoke(port: int) -> None:
+    import threading
+
+    import uvicorn
+
+    server = uvicorn.Server(
+        uvicorn.Config("app.main:app", host="127.0.0.1", port=port, access_log=False)
+    )
+
+    def listen_for_stop() -> None:
+        command = sys.stdin.buffer.readline()
+        if command == b"crash\n":
+            os._exit(0)  # Simulate worker loss against the isolated smoke database.
+        server.should_exit = True
+
+    threading.Thread(target=listen_for_stop, daemon=True).start()
+    server.run()
+
+
 @contextmanager
-def local_server(database: Path) -> Iterator[httpx.Client]:
+def local_server(database: Path, *, crash: bool = False) -> Iterator[httpx.Client]:
     with socket.socket() as probe:
         probe.bind(("127.0.0.1", 0))
         port = probe.getsockname()[1]
@@ -131,16 +150,13 @@ def local_server(database: Path) -> Iterator[httpx.Client]:
     proc = subprocess.Popen(
         [
             sys.executable,
-            "-m",
-            "uvicorn",
-            "app.main:app",
-            "--host",
-            "127.0.0.1",
-            "--port",
+            str(Path(__file__).resolve()),
+            "--smoke-server",
             str(port),
         ],
         cwd=ROOT / "backend",
         env=env,
+        stdin=subprocess.PIPE,
         stdout=subprocess.DEVNULL,
     )
     try:
@@ -161,8 +177,7 @@ def local_server(database: Path) -> Iterator[httpx.Client]:
                 raise TimeoutError("Local verification server did not start.")
             yield client
     finally:
-        proc.terminate()
-        proc.wait(timeout=15)
+        proc.communicate(input=b"crash\n" if crash else b"stop\n", timeout=15)
 
 
 def poll(
@@ -195,7 +210,7 @@ def simulated_smoke() -> int:
             fixture = json.loads(
                 (ROOT / "sample_data/requests.json").read_text(encoding="utf-8")
             )[0]
-            with local_server(db) as api:
+            with local_server(db, crash=True) as api:
                 verify(
                     11,
                     api.get("health").json()["jira_mode"] == "simulation"
@@ -365,7 +380,11 @@ if __name__ == "__main__":
     parser.add_argument("--reviewer", default="")
     parser.add_argument("--reason", default="")
     parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--smoke-server", type=int, help=argparse.SUPPRESS)
     options = parser.parse_args()
+    if options.smoke_server:
+        serve_smoke(options.smoke_server)
+        raise SystemExit(0)
     if options.live_jira:
         if options.version is None:
             parser.error("Supply the version you reviewed.")

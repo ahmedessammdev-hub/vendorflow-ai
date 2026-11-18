@@ -52,7 +52,7 @@ uv run --project backend python scripts/run_llm_eval.py
 uv run --project backend python scripts/collect_metrics.py
 ```
 
-For individual commands, see [AGENTS.md](AGENTS.md). To recapture screenshots in `docs/screenshots`, run `npx playwright test` from `frontend`. The collector saves its latest logs and browser captures under `.runtime/metrics/`. The separate live evaluation requires explicit authorization, a configured model, and `scripts/run_llm_eval.py --live`. The first unavailable case stops that run. A live Jira verification requires an existing request, its current version, the explicit reviewer decision and a test site. [Live verification procedure](docs/workflows.md)
+For individual commands, see [AGENTS.md](AGENTS.md). To recapture screenshots in `docs/screenshots`, run `npx playwright test` from `frontend`. The collector saves its latest logs and browser captures under `.runtime/metrics/`. The separate live evaluation requires explicit authorization, a configured model, and `scripts/run_llm_eval.py --live`. By default the harness stops if neither stage of the first case returns a validated output. Use `--all-cases` for an authorized exhaustive run. A live Jira verification requires an existing request, its current version, the explicit reviewer decision and a test site. [Live verification procedure](docs/workflows.md)
 
 ## Measured results
 
